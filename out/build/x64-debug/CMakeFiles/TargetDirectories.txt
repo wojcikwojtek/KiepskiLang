@@ -1,0 +1,10 @@
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/ProjektJFiK/out/build/x64-debug/CMakeFiles/intrinsics_gen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/ProjektJFiK/out/build/x64-debug/CMakeFiles/vt_gen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/ProjektJFiK/out/build/x64-debug/CMakeFiles/omp_gen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/ProjektJFiK/out/build/x64-debug/CMakeFiles/acc_gen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/ProjektJFiK/out/build/x64-debug/CMakeFiles/ARMTargetParserTableGen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/ProjektJFiK/out/build/x64-debug/CMakeFiles/AArch64TargetParserTableGen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/ProjektJFiK/out/build/x64-debug/CMakeFiles/RISCVTargetParserTableGen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/ProjektJFiK/out/build/x64-debug/CMakeFiles/ProjektJFiK.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/ProjektJFiK/out/build/x64-debug/CMakeFiles/edit_cache.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/ProjektJFiK/out/build/x64-debug/CMakeFiles/rebuild_cache.dir

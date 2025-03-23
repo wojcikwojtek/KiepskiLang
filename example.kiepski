@@ -1,0 +1,7 @@
+START PROGRAM:
+int x = 5
+int y = 10
+PRINT x + y * 2
+READ x
+PRINT x
+END PROGRAM

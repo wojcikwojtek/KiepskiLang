@@ -1,0 +1,10 @@
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/KiepskiLang/out/build/x64-release/CMakeFiles/intrinsics_gen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/KiepskiLang/out/build/x64-release/CMakeFiles/vt_gen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/KiepskiLang/out/build/x64-release/CMakeFiles/omp_gen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/KiepskiLang/out/build/x64-release/CMakeFiles/acc_gen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/KiepskiLang/out/build/x64-release/CMakeFiles/ARMTargetParserTableGen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/KiepskiLang/out/build/x64-release/CMakeFiles/AArch64TargetParserTableGen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/KiepskiLang/out/build/x64-release/CMakeFiles/RISCVTargetParserTableGen.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/KiepskiLang/out/build/x64-release/CMakeFiles/KiepskiCompiler.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/KiepskiLang/out/build/x64-release/CMakeFiles/edit_cache.dir
+C:/Users/wojte/Desktop/Wojtek/studiapw/JFiK/KiepskiLang/out/build/x64-release/CMakeFiles/rebuild_cache.dir
