@@ -43,6 +43,9 @@ public:
   virtual void enterMulExpr(KiepskiLangParser::MulExprContext * /*ctx*/) override { }
   virtual void exitMulExpr(KiepskiLangParser::MulExprContext * /*ctx*/) override { }
 
+  virtual void enterFloatLiteral(KiepskiLangParser::FloatLiteralContext * /*ctx*/) override { }
+  virtual void exitFloatLiteral(KiepskiLangParser::FloatLiteralContext * /*ctx*/) override { }
+
   virtual void enterBraces(KiepskiLangParser::BracesContext * /*ctx*/) override { }
   virtual void exitBraces(KiepskiLangParser::BracesContext * /*ctx*/) override { }
 

@@ -37,6 +37,8 @@ public:
 
     virtual std::any visitMulExpr(KiepskiLangParser::MulExprContext *context) = 0;
 
+    virtual std::any visitFloatLiteral(KiepskiLangParser::FloatLiteralContext *context) = 0;
+
     virtual std::any visitBraces(KiepskiLangParser::BracesContext *context) = 0;
 
     virtual std::any visitVarReference(KiepskiLangParser::VarReferenceContext *context) = 0;

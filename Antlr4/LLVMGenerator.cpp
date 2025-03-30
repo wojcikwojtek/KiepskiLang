@@ -73,12 +73,21 @@ std::any LLVMGenerator::visitVarDecl(KiepskiLangParser::VarDeclContext* ctx) {
         std::cerr << "Blad przy deklaracji zmiennej " + ctx->ID()->getText() << std::endl;
         return nullptr;
     }
+    AllocaInst* allocatedVar = nullptr;
     if (ctx->TYPE()->getText() == "int") {
-        AllocaInst* allocatedVar = builder->CreateAlloca(Type::getInt32Ty(*theContext), nullptr, ctx->ID()->getText());
-        namedValues.insert({ ctx->ID()->getText(), allocatedVar });
-        return (Value*) builder->CreateStore(evaluatedExpr, allocatedVar);
+        allocatedVar = builder->CreateAlloca(Type::getInt32Ty(*theContext), nullptr, ctx->ID()->getText());
+        if (evaluatedExpr->getType()->isFloatTy()) {
+            evaluatedExpr = builder->CreateCast(Instruction::FPToSI, evaluatedExpr, Type::getInt32Ty(*theContext));
+        }
     }
-    return nullptr;
+    if (ctx->TYPE()->getText() == "float") {
+        allocatedVar = builder->CreateAlloca(Type::getFloatTy(*theContext), nullptr, ctx->ID()->getText());
+        if (evaluatedExpr->getType()->isIntegerTy()) {
+            evaluatedExpr = builder->CreateCast(Instruction::SIToFP, evaluatedExpr, Type::getFloatTy(*theContext));
+        }
+    }
+    namedValues.insert({ ctx->ID()->getText(), allocatedVar });
+    return (Value*)builder->CreateStore(evaluatedExpr, allocatedVar);
 }
 
 std::any LLVMGenerator::visitPrint(KiepskiLangParser::PrintContext* ctx) {
@@ -99,7 +108,20 @@ std::any LLVMGenerator::visitPrint(KiepskiLangParser::PrintContext* ctx) {
         std::cerr << "Nieprawidłowe expr w wyrażeniu print" << std::endl;
         return nullptr;
     }
-    llvm::Value* formatStr = builder->CreateGlobalStringPtr("%d\n", "fmt");
+    Value* formatStr = nullptr;
+    if (val->getType()->isIntegerTy()) {
+        formatStr = theModule->getNamedGlobal("intFormat");
+        if (!formatStr) {
+            formatStr = builder->CreateGlobalStringPtr("%d\n", "intFormat");
+        }
+    }
+    if (val->getType()->isFloatTy()) {
+        val = builder->CreateFPExt(val, Type::getDoubleTy(*theContext), val->getName() + "_double");
+        formatStr = theModule->getNamedGlobal("doubleFormat");
+        if (!formatStr) {
+            formatStr = builder->CreateGlobalStringPtr("%f\n", "doubleFormat");
+        }
+    }
     builder->CreateCall(printfFunc, { formatStr, val });
     return nullptr;
 }
@@ -123,7 +145,7 @@ std::any LLVMGenerator::visitRead(KiepskiLangParser::ReadContext* ctx) {
             scanfType, Function::ExternalLinkage, "scanf", *theModule
         );
     }
-
+    //TODO: SCANF DLA ROZNYCH TYPOW
     llvm::Value* formatStr = builder->CreateGlobalStringPtr("%d", "fmt");
     builder->CreateCall(scanfFunc, { formatStr, v });
     return nullptr;
@@ -138,6 +160,9 @@ std::any LLVMGenerator::visitExpr(KiepskiLangParser::ExprContext* ctx) {
     }
     else if (dynamic_cast<KiepskiLangParser::IntLiteralContext*>(ctx)) {
         return visitIntLiteral(dynamic_cast<KiepskiLangParser::IntLiteralContext*>(ctx));
+    }
+    else if (dynamic_cast<KiepskiLangParser::FloatLiteralContext*>(ctx)) {
+        return visitFloatLiteral(dynamic_cast<KiepskiLangParser::FloatLiteralContext*>(ctx));
     }
     else if (dynamic_cast<KiepskiLangParser::VarReferenceContext*>(ctx)) {
         return visitVarReference(dynamic_cast<KiepskiLangParser::VarReferenceContext*>(ctx));
@@ -161,10 +186,36 @@ std::any LLVMGenerator::visitAddExpr(KiepskiLangParser::AddExprContext* ctx) {
 
     std::string op = ctx->children[1]->getText();
     if (op == "+") {
-        return (Value*)builder->CreateAdd(l, r, "addtmp");
+        if (l->getType()->isIntegerTy() && r->getType()->isIntegerTy()) {
+            return (Value*)builder->CreateAdd(l, r, "addtmp");
+        }
+        else if (l->getType()->isIntegerTy() && r->getType()->isFloatTy()) {
+            l = builder->CreateCast(Instruction::SIToFP, l, Type::getFloatTy(*theContext));
+            return (Value*)builder->CreateFAdd(l, r, "addtmp");
+        }
+        else if (l->getType()->isFloatTy() && r->getType()->isIntegerTy()) {
+            r = builder->CreateCast(Instruction::SIToFP, r, Type::getFloatTy(*theContext));
+            return (Value*)builder->CreateFAdd(l, r, "addtmp");
+        }
+        else if (l->getType()->isFloatTy() && r->getType()->isFloatTy()) {
+            return (Value*)builder->CreateFAdd(l, r, "addtmp");
+        }
     }
     else if (op == "-") {
-        return (Value*)builder->CreateSub(l, r, "subtmp");
+        if (l->getType()->isIntegerTy() && r->getType()->isIntegerTy()) {
+            return (Value*)builder->CreateSub(l, r, "subtmp");
+        }
+        else if (l->getType()->isIntegerTy() && r->getType()->isFloatTy()) {
+            l = builder->CreateCast(Instruction::SIToFP, l, Type::getFloatTy(*theContext));
+            return (Value*)builder->CreateFSub(l, r, "addtmp");
+        }
+        else if (l->getType()->isFloatTy() && r->getType()->isIntegerTy()) {
+            r = builder->CreateCast(Instruction::SIToFP, r, Type::getFloatTy(*theContext));
+            return (Value*)builder->CreateFSub(l, r, "addtmp");
+        }
+        else if (l->getType()->isFloatTy() && r->getType()->isFloatTy()) {
+            return (Value*)builder->CreateFSub(l, r, "subtmp");
+        }
     }
     return nullptr;
 }
@@ -173,6 +224,12 @@ std::any LLVMGenerator::visitIntLiteral(KiepskiLangParser::IntLiteralContext* ct
     int intValue = std::stoi(ctx->INT()->getText());
 
     return (Value*)ConstantInt::get(Type::getInt32Ty(*theContext), intValue, true);
+}
+
+std::any LLVMGenerator::visitFloatLiteral(KiepskiLangParser::FloatLiteralContext* ctx) {
+    float floatValue = std::stof(ctx->FLOAT()->getText());
+
+    return (Value*)ConstantFP::get(Type::getFloatTy(*theContext), floatValue);
 }
 
 std::any LLVMGenerator::visitMulExpr(KiepskiLangParser::MulExprContext* ctx) {
@@ -188,9 +245,32 @@ std::any LLVMGenerator::visitMulExpr(KiepskiLangParser::MulExprContext* ctx) {
 
     std::string op = ctx->children[1]->getText();
     if (op == "*") {
-        return (Value*)builder->CreateMul(l, r, "multmp");
+        if (l->getType()->isIntegerTy() && r->getType()->isIntegerTy()) {
+            return (Value*)builder->CreateMul(l, r, "multmp");
+        }
+        else if (l->getType()->isIntegerTy() && r->getType()->isFloatTy()) {
+            l = builder->CreateCast(Instruction::SIToFP, l, Type::getFloatTy(*theContext));
+            return (Value*)builder->CreateFMul(l, r, "multmp");
+        }
+        else if (l->getType()->isFloatTy() && r->getType()->isIntegerTy()) {
+            r = builder->CreateCast(Instruction::SIToFP, r, Type::getFloatTy(*theContext));
+            return (Value*)builder->CreateFMul(l, r, "multmp");
+        }
+        else if (l->getType()->isFloatTy() && r->getType()->isFloatTy()) {
+            return (Value*)builder->CreateFMul(l, r, "multmp");
+        }
     }
     else if (op == "/") {
+        if (l->getType()->isIntegerTy() && r->getType()->isIntegerTy()) {
+            l = builder->CreateCast(Instruction::SIToFP, l, Type::getFloatTy(*theContext));
+            r = builder->CreateCast(Instruction::SIToFP, r, Type::getFloatTy(*theContext));
+        }
+        else if (l->getType()->isIntegerTy() && r->getType()->isFloatTy()) {
+            l = builder->CreateCast(Instruction::SIToFP, l, Type::getFloatTy(*theContext));
+        }
+        else if (l->getType()->isFloatTy() && r->getType()->isIntegerTy()) {
+            r = builder->CreateCast(Instruction::SIToFP, r, Type::getFloatTy(*theContext));
+        }
         return (Value*)builder->CreateFDiv(l, r, "divtmp");
     }
     return nullptr;
@@ -207,5 +287,13 @@ std::any LLVMGenerator::visitVarReference(KiepskiLangParser::VarReferenceContext
     if (!v) {
         return logErrorV("Unknown variable name: " + varName);
     }
-    return (Value*)builder->CreateLoad(Type::getInt32Ty(*theContext), v, varName + "_val");
+
+    AllocaInst* allocaInst = dyn_cast<AllocaInst>(v);
+    if (allocaInst->getAllocatedType()->isIntegerTy()) {
+        return (Value*)builder->CreateLoad(Type::getInt32Ty(*theContext), v, varName + "_val");
+    } 
+    if (allocaInst->getAllocatedType()->isFloatTy()) {
+        return (Value*)builder->CreateLoad(Type::getFloatTy(*theContext), v, varName + "_val");
+    }
+    return nullptr;
 }

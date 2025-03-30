@@ -61,31 +61,31 @@ void kiepskilangParserInitialize() {
     },
     std::vector<std::string>{
       "", "", "", "", "", "", "", "", "", "", "STARTPROG", "ENDPROG", "NEWLINE", 
-      "TYPE", "ID", "BINARYOPERATOR", "INT", "WS"
+      "TYPE", "ID", "BINARYOPERATOR", "INT", "FLOAT", "WS"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,17,72,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,1,0,
+  	4,1,18,73,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,1,0,
   	1,0,1,1,1,1,1,1,5,1,20,8,1,10,1,12,1,23,9,1,1,1,1,1,1,2,1,2,1,2,1,2,1,
   	2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,3,2,39,8,2,1,3,1,3,1,3,1,3,1,3,1,4,1,4,
-  	1,4,1,5,1,5,1,5,1,6,1,6,1,6,1,6,1,6,1,6,1,6,3,6,59,8,6,1,6,1,6,1,6,1,
-  	6,1,6,1,6,5,6,67,8,6,10,6,12,6,70,9,6,1,6,0,1,12,7,0,2,4,6,8,10,12,0,
-  	2,1,0,4,5,1,0,6,7,72,0,14,1,0,0,0,2,16,1,0,0,0,4,38,1,0,0,0,6,40,1,0,
-  	0,0,8,45,1,0,0,0,10,48,1,0,0,0,12,58,1,0,0,0,14,15,3,2,1,0,15,1,1,0,0,
-  	0,16,17,5,10,0,0,17,21,5,12,0,0,18,20,3,4,2,0,19,18,1,0,0,0,20,23,1,0,
-  	0,0,21,19,1,0,0,0,21,22,1,0,0,0,22,24,1,0,0,0,23,21,1,0,0,0,24,25,5,11,
-  	0,0,25,3,1,0,0,0,26,27,3,6,3,0,27,28,5,12,0,0,28,39,1,0,0,0,29,30,3,8,
-  	4,0,30,31,5,12,0,0,31,39,1,0,0,0,32,33,3,10,5,0,33,34,5,12,0,0,34,39,
-  	1,0,0,0,35,36,3,12,6,0,36,37,5,12,0,0,37,39,1,0,0,0,38,26,1,0,0,0,38,
-  	29,1,0,0,0,38,32,1,0,0,0,38,35,1,0,0,0,39,5,1,0,0,0,40,41,5,13,0,0,41,
-  	42,5,14,0,0,42,43,5,1,0,0,43,44,3,12,6,0,44,7,1,0,0,0,45,46,5,2,0,0,46,
-  	47,3,12,6,0,47,9,1,0,0,0,48,49,5,3,0,0,49,50,5,14,0,0,50,11,1,0,0,0,51,
-  	52,6,6,-1,0,52,59,5,16,0,0,53,59,5,14,0,0,54,55,5,8,0,0,55,56,3,12,6,
-  	0,56,57,5,9,0,0,57,59,1,0,0,0,58,51,1,0,0,0,58,53,1,0,0,0,58,54,1,0,0,
-  	0,59,68,1,0,0,0,60,61,10,5,0,0,61,62,7,0,0,0,62,67,3,12,6,6,63,64,10,
-  	4,0,0,64,65,7,1,0,0,65,67,3,12,6,5,66,60,1,0,0,0,66,63,1,0,0,0,67,70,
-  	1,0,0,0,68,66,1,0,0,0,68,69,1,0,0,0,69,13,1,0,0,0,70,68,1,0,0,0,5,21,
-  	38,58,66,68
+  	1,4,1,5,1,5,1,5,1,6,1,6,1,6,1,6,1,6,1,6,1,6,1,6,3,6,60,8,6,1,6,1,6,1,
+  	6,1,6,1,6,1,6,5,6,68,8,6,10,6,12,6,71,9,6,1,6,0,1,12,7,0,2,4,6,8,10,12,
+  	0,2,1,0,4,5,1,0,6,7,74,0,14,1,0,0,0,2,16,1,0,0,0,4,38,1,0,0,0,6,40,1,
+  	0,0,0,8,45,1,0,0,0,10,48,1,0,0,0,12,59,1,0,0,0,14,15,3,2,1,0,15,1,1,0,
+  	0,0,16,17,5,10,0,0,17,21,5,12,0,0,18,20,3,4,2,0,19,18,1,0,0,0,20,23,1,
+  	0,0,0,21,19,1,0,0,0,21,22,1,0,0,0,22,24,1,0,0,0,23,21,1,0,0,0,24,25,5,
+  	11,0,0,25,3,1,0,0,0,26,27,3,6,3,0,27,28,5,12,0,0,28,39,1,0,0,0,29,30,
+  	3,8,4,0,30,31,5,12,0,0,31,39,1,0,0,0,32,33,3,10,5,0,33,34,5,12,0,0,34,
+  	39,1,0,0,0,35,36,3,12,6,0,36,37,5,12,0,0,37,39,1,0,0,0,38,26,1,0,0,0,
+  	38,29,1,0,0,0,38,32,1,0,0,0,38,35,1,0,0,0,39,5,1,0,0,0,40,41,5,13,0,0,
+  	41,42,5,14,0,0,42,43,5,1,0,0,43,44,3,12,6,0,44,7,1,0,0,0,45,46,5,2,0,
+  	0,46,47,3,12,6,0,47,9,1,0,0,0,48,49,5,3,0,0,49,50,5,14,0,0,50,11,1,0,
+  	0,0,51,52,6,6,-1,0,52,60,5,16,0,0,53,60,5,17,0,0,54,60,5,14,0,0,55,56,
+  	5,8,0,0,56,57,3,12,6,0,57,58,5,9,0,0,58,60,1,0,0,0,59,51,1,0,0,0,59,53,
+  	1,0,0,0,59,54,1,0,0,0,59,55,1,0,0,0,60,69,1,0,0,0,61,62,10,6,0,0,62,63,
+  	7,0,0,0,63,68,3,12,6,7,64,65,10,5,0,0,65,66,7,1,0,0,66,68,3,12,6,6,67,
+  	61,1,0,0,0,67,64,1,0,0,0,68,71,1,0,0,0,69,67,1,0,0,0,69,70,1,0,0,0,70,
+  	13,1,0,0,0,71,69,1,0,0,0,5,21,38,59,67,69
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -268,7 +268,7 @@ KiepskiLangParser::StartContext* KiepskiLangParser::start() {
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 90380) != 0)) {
+      ((1ULL << _la) & 221452) != 0)) {
       setState(18);
       statement();
       setState(23);
@@ -383,7 +383,8 @@ KiepskiLangParser::StatementContext* KiepskiLangParser::statement() {
 
       case KiepskiLangParser::T__7:
       case KiepskiLangParser::ID:
-      case KiepskiLangParser::INT: {
+      case KiepskiLangParser::INT:
+      case KiepskiLangParser::FLOAT: {
         enterOuterAlt(_localctx, 4);
         setState(35);
         expr(0);
@@ -705,6 +706,31 @@ std::any KiepskiLangParser::MulExprContext::accept(tree::ParseTreeVisitor *visit
   else
     return visitor->visitChildren(this);
 }
+//----------------- FloatLiteralContext ------------------------------------------------------------------
+
+tree::TerminalNode* KiepskiLangParser::FloatLiteralContext::FLOAT() {
+  return getToken(KiepskiLangParser::FLOAT, 0);
+}
+
+KiepskiLangParser::FloatLiteralContext::FloatLiteralContext(ExprContext *ctx) { copyFrom(ctx); }
+
+void KiepskiLangParser::FloatLiteralContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<KiepskiLangListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterFloatLiteral(this);
+}
+void KiepskiLangParser::FloatLiteralContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<KiepskiLangListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitFloatLiteral(this);
+}
+
+std::any KiepskiLangParser::FloatLiteralContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<KiepskiLangVisitor*>(visitor))
+    return parserVisitor->visitFloatLiteral(this);
+  else
+    return visitor->visitChildren(this);
+}
 //----------------- BracesContext ------------------------------------------------------------------
 
 KiepskiLangParser::ExprContext* KiepskiLangParser::BracesContext::expr() {
@@ -781,7 +807,7 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(58);
+    setState(59);
     _errHandler->sync(this);
     switch (_input->LA(1)) {
       case KiepskiLangParser::INT: {
@@ -794,11 +820,20 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
         break;
       }
 
+      case KiepskiLangParser::FLOAT: {
+        _localctx = _tracker.createInstance<FloatLiteralContext>(_localctx);
+        _ctx = _localctx;
+        previousContext = _localctx;
+        setState(53);
+        match(KiepskiLangParser::FLOAT);
+        break;
+      }
+
       case KiepskiLangParser::ID: {
         _localctx = _tracker.createInstance<VarReferenceContext>(_localctx);
         _ctx = _localctx;
         previousContext = _localctx;
-        setState(53);
+        setState(54);
         match(KiepskiLangParser::ID);
         break;
       }
@@ -807,11 +842,11 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
         _localctx = _tracker.createInstance<BracesContext>(_localctx);
         _ctx = _localctx;
         previousContext = _localctx;
-        setState(54);
-        match(KiepskiLangParser::T__7);
         setState(55);
-        expr(0);
+        match(KiepskiLangParser::T__7);
         setState(56);
+        expr(0);
+        setState(57);
         match(KiepskiLangParser::T__8);
         break;
       }
@@ -820,7 +855,7 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
       throw NoViableAltException(this);
     }
     _ctx->stop = _input->LT(-1);
-    setState(68);
+    setState(69);
     _errHandler->sync(this);
     alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 4, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
@@ -828,17 +863,17 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
         if (!_parseListeners.empty())
           triggerExitRuleEvent();
         previousContext = _localctx;
-        setState(66);
+        setState(67);
         _errHandler->sync(this);
         switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 3, _ctx)) {
         case 1: {
           auto newContext = _tracker.createInstance<MulExprContext>(_tracker.createInstance<ExprContext>(parentContext, parentState));
           _localctx = newContext;
           pushNewRecursionContext(newContext, startState, RuleExpr);
-          setState(60);
-
-          if (!(precpred(_ctx, 5))) throw FailedPredicateException(this, "precpred(_ctx, 5)");
           setState(61);
+
+          if (!(precpred(_ctx, 6))) throw FailedPredicateException(this, "precpred(_ctx, 6)");
+          setState(62);
           _la = _input->LA(1);
           if (!(_la == KiepskiLangParser::T__3
 
@@ -849,8 +884,8 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
             _errHandler->reportMatch(this);
             consume();
           }
-          setState(62);
-          expr(6);
+          setState(63);
+          expr(7);
           break;
         }
 
@@ -858,10 +893,10 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
           auto newContext = _tracker.createInstance<AddExprContext>(_tracker.createInstance<ExprContext>(parentContext, parentState));
           _localctx = newContext;
           pushNewRecursionContext(newContext, startState, RuleExpr);
-          setState(63);
-
-          if (!(precpred(_ctx, 4))) throw FailedPredicateException(this, "precpred(_ctx, 4)");
           setState(64);
+
+          if (!(precpred(_ctx, 5))) throw FailedPredicateException(this, "precpred(_ctx, 5)");
+          setState(65);
           _la = _input->LA(1);
           if (!(_la == KiepskiLangParser::T__5
 
@@ -872,8 +907,8 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
             _errHandler->reportMatch(this);
             consume();
           }
-          setState(65);
-          expr(5);
+          setState(66);
+          expr(6);
           break;
         }
 
@@ -881,7 +916,7 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
           break;
         } 
       }
-      setState(70);
+      setState(71);
       _errHandler->sync(this);
       alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 4, _ctx);
     }
@@ -906,8 +941,8 @@ bool KiepskiLangParser::sempred(RuleContext *context, size_t ruleIndex, size_t p
 
 bool KiepskiLangParser::exprSempred(ExprContext *_localctx, size_t predicateIndex) {
   switch (predicateIndex) {
-    case 0: return precpred(_ctx, 5);
-    case 1: return precpred(_ctx, 4);
+    case 0: return precpred(_ctx, 6);
+    case 1: return precpred(_ctx, 5);
 
   default:
     break;

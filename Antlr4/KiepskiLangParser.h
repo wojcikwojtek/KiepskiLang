@@ -14,7 +14,7 @@ public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, STARTPROG = 10, ENDPROG = 11, NEWLINE = 12, TYPE = 13, 
-    ID = 14, BINARYOPERATOR = 15, INT = 16, WS = 17
+    ID = 14, BINARYOPERATOR = 15, INT = 16, FLOAT = 17, WS = 18
   };
 
   enum {
@@ -189,6 +189,17 @@ public:
 
     std::vector<ExprContext *> expr();
     ExprContext* expr(size_t i);
+    virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
+    virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
+
+    virtual std::any accept(antlr4::tree::ParseTreeVisitor *visitor) override;
+  };
+
+  class  FloatLiteralContext : public ExprContext {
+  public:
+    FloatLiteralContext(ExprContext *ctx);
+
+    antlr4::tree::TerminalNode *FLOAT();
     virtual void enterRule(antlr4::tree::ParseTreeListener *listener) override;
     virtual void exitRule(antlr4::tree::ParseTreeListener *listener) override;
 

@@ -44,6 +44,8 @@ public:
 
     virtual std::any visitIntLiteral(KiepskiLangParser::IntLiteralContext* ctx) override;
 
+    virtual std::any visitFloatLiteral(KiepskiLangParser::FloatLiteralContext* ctx) override;
+
     virtual std::any visitMulExpr(KiepskiLangParser::MulExprContext* ctx) override;
 
     virtual std::any visitBraces(KiepskiLangParser::BracesContext* ctx) override;

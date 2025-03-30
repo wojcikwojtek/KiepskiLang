@@ -4,6 +4,7 @@
 #include "Antlr4/KiepskiLangLexer.h"
 #include "Antlr4/KiepskiLangParser.h"
 #include "Antlr4/LLVMGenerator.h"
+#include "Antlr4/KiepskiLangErrorListener.h"
 
 using namespace antlr4;
 
@@ -16,6 +17,10 @@ int main()
     KiepskiLangLexer lexer(&input);
     CommonTokenStream tokens(&lexer);
     KiepskiLangParser parser(&tokens);
+
+    KiepskiLangErrorListener errorListener;
+    parser.removeErrorListeners();
+    parser.addErrorListener(&errorListener);
 
     KiepskiLangParser::ProgramContext* tree = parser.program();
 

@@ -30,7 +30,7 @@ separate_arguments(LLVM_DEFINITIONS_LIST NATIVE_COMMAND ${LLVM_DEFINITIONS})
 add_definitions(${LLVM_DEFINITIONS_LIST})
 
 # Dodaj źródło do pliku wykonywalnego tego projektu.
-add_executable (KiepskiCompiler "Main.cpp" "Main.h" ${SOURCES})
+add_executable (KiepskiCompiler "Main.cpp" "Main.h" ${SOURCES} "Antlr4/KiepskiLangErrorListener.h")
 include_directories(${SOURCE_DIR})
 
 # Find the libraries that correspond to the LLVM components

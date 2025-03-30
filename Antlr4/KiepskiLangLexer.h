@@ -14,7 +14,7 @@ public:
   enum {
     T__0 = 1, T__1 = 2, T__2 = 3, T__3 = 4, T__4 = 5, T__5 = 6, T__6 = 7, 
     T__7 = 8, T__8 = 9, STARTPROG = 10, ENDPROG = 11, NEWLINE = 12, TYPE = 13, 
-    ID = 14, BINARYOPERATOR = 15, INT = 16, WS = 17
+    ID = 14, BINARYOPERATOR = 15, INT = 16, FLOAT = 17, WS = 18
   };
 
   explicit KiepskiLangLexer(antlr4::CharStream *input);

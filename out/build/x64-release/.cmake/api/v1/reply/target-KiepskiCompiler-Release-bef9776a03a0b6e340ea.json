@@ -384,7 +384,8 @@
 			"name" : "Header Files",
 			"sourceIndexes" : 
 			[
-				1
+				1,
+				8
 			]
 		}
 	],
@@ -436,6 +437,11 @@
 			"compileGroupIndex" : 0,
 			"path" : "Antlr4/LLVMGenerator.cpp",
 			"sourceGroupIndex" : 0
+		},
+		{
+			"backtrace" : 1,
+			"path" : "Antlr4/KiepskiLangErrorListener.h",
+			"sourceGroupIndex" : 1
 		}
 	],
 	"type" : "EXECUTABLE"
