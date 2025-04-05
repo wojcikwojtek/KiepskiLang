@@ -24,7 +24,9 @@ private:
     static std::unique_ptr<LLVMContext> theContext;
     static std::unique_ptr<IRBuilder<>> builder;
     static std::unique_ptr<Module> theModule;
-    static std::map<std::string, Value*> namedValues;
+    static std::map<std::string, std::pair<Value*, std::string>> namedValues;
+    static std::map<std::string, int> arraySizes;
+    static std::map<std::string, std::pair<int, int>> matrixSizes;
     Value* logErrorV(std::string str);
 public:
 
@@ -34,23 +36,51 @@ public:
 
     virtual std::any visitStatement(KiepskiLangParser::StatementContext* ctx) override;
 
-    virtual std::any visitVarDecl(KiepskiLangParser::VarDeclContext* ctx) override;
+    virtual std::any visitScalarDecl(KiepskiLangParser::ScalarDeclContext* ctx) override;
+
+    virtual std::any visitArrayDecl(KiepskiLangParser::ArrayDeclContext* ctx) override;
+
+    virtual std::any visitMatrixDecl(KiepskiLangParser::MatrixDeclContext* ctx) override;
+
+    virtual std::any visitVariableAssign(KiepskiLangParser::VariableAssignContext* ctx) override;
+
+    virtual std::any visitArrayAssign(KiepskiLangParser::ArrayAssignContext* ctx) override;
+
+    virtual std::any visitMatrixAssign(KiepskiLangParser::MatrixAssignContext* ctx) override;
 
     virtual std::any visitPrint(KiepskiLangParser::PrintContext* ctx) override;
 
     virtual std::any visitRead(KiepskiLangParser::ReadContext* ctx) override;
 
+    virtual std::any visitLogicBinaryExpr(KiepskiLangParser::LogicBinaryExprContext* ctx) override;
+
+    virtual std::any visitArrayAccessExpr(KiepskiLangParser::ArrayAccessExprContext* ctx) override;
+
     virtual std::any visitAddExpr(KiepskiLangParser::AddExprContext* ctx) override;
 
     virtual std::any visitIntLiteral(KiepskiLangParser::IntLiteralContext* ctx) override;
 
+    virtual std::any visitComparisonExpr(KiepskiLangParser::ComparisonExprContext* ctx) override;
+
+    virtual std::any visitBoolLiteral(KiepskiLangParser::BoolLiteralContext* ctx) override;
+
     virtual std::any visitFloatLiteral(KiepskiLangParser::FloatLiteralContext* ctx) override;
+
+    virtual std::any visitMatrixAccessExpr(KiepskiLangParser::MatrixAccessExprContext* ctx) override;
+
+    virtual std::any visitStringLiteral(KiepskiLangParser::StringLiteralContext* ctx) override;
 
     virtual std::any visitMulExpr(KiepskiLangParser::MulExprContext* ctx) override;
 
     virtual std::any visitBraces(KiepskiLangParser::BracesContext* ctx) override;
 
     virtual std::any visitVarReference(KiepskiLangParser::VarReferenceContext* ctx) override;
+
+    virtual std::any visitLogicNegExpr(KiepskiLangParser::LogicNegExprContext* ctx) override;
+
+    virtual std::any visitArrayInit(KiepskiLangParser::ArrayInitContext* ctx) override;
+
+    virtual std::any visitMatrixInit(KiepskiLangParser::MatrixInitContext* ctx) override;
 
     std::any visitExpr(KiepskiLangParser::ExprContext* ctx);
 };
