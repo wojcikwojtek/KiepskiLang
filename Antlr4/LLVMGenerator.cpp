@@ -129,7 +129,8 @@ std::any LLVMGenerator::visitScalarDecl(KiepskiLangParser::ScalarDeclContext* ct
         }
     }
     else if (ctx->TYPE()->getText() == "string") {
-
+        StructType* stringStructTy = StructType::getTypeByName(*theContext, "string");
+        allocatedVar = builder->CreateAlloca(stringStructTy, nullptr, ctx->ID()->getText());
     }
     namedValues.insert_or_assign(ctx->ID()->getText(), std::make_pair<Value*, std::string>(allocatedVar, ctx->TYPE()->getText()));
     return (Value*)builder->CreateStore(evaluatedExpr, allocatedVar);
@@ -203,6 +204,18 @@ std::any LLVMGenerator::visitArrayAssign(KiepskiLangParser::ArrayAssignContext* 
         arrayType = ArrayType::get(Type::getFloatTy(*theContext), arraySize);
         if (!evaluatedExpr->getType()->isFloatTy()) return logErrorV("Niezgodnosc typow");
     }
+    else if (type == "long") {
+        arrayType = ArrayType::get(Type::getInt64Ty(*theContext), arraySize);
+        if (!evaluatedExpr->getType()->isIntegerTy()) return logErrorV("Niezgodnosc typow");
+    }
+    else if (type == "double") {
+        arrayType = ArrayType::get(Type::getDoubleTy(*theContext), arraySize);
+        if (!evaluatedExpr->getType()->isFloatingPointTy()) return logErrorV("Niezgodnosc typow");
+    }
+    else if (type == "bool") {
+        arrayType = ArrayType::get(Type::getInt1Ty(*theContext), arraySize);
+        if (evaluatedExpr->getType() != Type::getInt1Ty(*theContext)) return logErrorV("Niezgpdnosc typow");
+    }
 
     AllocaInst* allocaInst = dyn_cast<AllocaInst>(allocatedVar);
     Value* array = builder->CreateLoad(allocaInst->getAllocatedType(), allocaInst, "loaded_array");
@@ -236,6 +249,18 @@ std::any LLVMGenerator::visitMatrixAssign(KiepskiLangParser::MatrixAssignContext
         matrixType = ArrayType::get(ArrayType::get(Type::getFloatTy(*theContext), matrixSize.second), matrixSize.first);
         if (!evaluatedExpr->getType()->isFloatTy()) return logErrorV("Niezgodnosc typow");
     }
+    else if (type == "long") {
+        matrixType = ArrayType::get(ArrayType::get(Type::getInt64Ty(*theContext), matrixSize.second), matrixSize.first);
+        if (!evaluatedExpr->getType()->isIntegerTy()) return logErrorV("Niezgodnosc typow");
+    }
+    else if (type == "double") {
+        matrixType = ArrayType::get(ArrayType::get(Type::getDoubleTy(*theContext), matrixSize.second), matrixSize.first);
+        if (!evaluatedExpr->getType()->isFloatingPointTy()) return logErrorV("Niezgodnosc typow");
+    }
+    else if (type == "bool") {
+        matrixType = ArrayType::get(ArrayType::get(Type::getInt1Ty(*theContext), matrixSize.second), matrixSize.first);
+        if (evaluatedExpr->getType() != Type::getInt1Ty(*theContext)) return logErrorV("Niezgpdnosc typow");
+    }
 
     AllocaInst* allocaInst = dyn_cast<AllocaInst>(allocatedVar);
     Value* matrix = builder->CreateLoad(allocaInst->getAllocatedType(), allocaInst, "loaded_matrix");
@@ -262,6 +287,7 @@ std::any LLVMGenerator::visitPrint(KiepskiLangParser::PrintContext* ctx) {
         return nullptr;
     }
     Value* formatStr = nullptr;
+    StructType* stringStructTy = StructType::getTypeByName(*theContext, "string");
     if (val->getType() == Type::getInt32Ty(*theContext) || val->getType() == Type::getInt1Ty(*theContext)) {
         formatStr = theModule->getNamedGlobal("intFormat");
         if (!formatStr) {
@@ -285,6 +311,13 @@ std::any LLVMGenerator::visitPrint(KiepskiLangParser::PrintContext* ctx) {
         if (!formatStr) {
             formatStr = builder->CreateGlobalStringPtr("%f\n", "doubleFormat");
         }
+    }
+    else if (val->getType() == stringStructTy) {
+        formatStr = theModule->getNamedGlobal("stringFormat");
+        if (!formatStr) {
+            formatStr = builder->CreateGlobalStringPtr("%s\n", "stringFormat");
+        }
+        val = (Value*)builder->CreateExtractValue(val, { 0 });
     }
     builder->CreateCall(printfFunc, { formatStr, val });
     return nullptr;
@@ -435,12 +468,20 @@ std::any LLVMGenerator::visitArrayAccessExpr(KiepskiLangParser::ArrayAccessExprC
     Type* arrayType = nullptr;
     if (typeStr == "int") {
         type = Type::getInt32Ty(*theContext);
-        arrayType = ArrayType::get(type, arraySize);
     }
     else if (typeStr == "float") {
         type = Type::getFloatTy(*theContext);
-        arrayType = ArrayType::get(type, arraySize);
     }
+    else if (typeStr == "long") {
+        type = Type::getInt64Ty(*theContext);
+    }
+    else if (typeStr == "double") {
+        type = Type::getDoubleTy(*theContext);
+    }
+    else if (typeStr == "bool") {
+        type = Type::getInt1Ty(*theContext);
+    }
+    arrayType = ArrayType::get(type, arraySize);
     AllocaInst* allocaInst = dyn_cast<AllocaInst>(v);
     Value* array = builder->CreateLoad(allocaInst->getAllocatedType(), allocaInst, "loaded_array");
     Value* element = builder->CreateInBoundsGEP(arrayType, array, { builder->getInt32(0), builder->getInt32(evaluatedIndex) }, "array_elem_ptr");
@@ -592,6 +633,15 @@ std::any LLVMGenerator::visitMatrixAccessExpr(KiepskiLangParser::MatrixAccessExp
     else if (typeStr == "float") {
         type = Type::getFloatTy(*theContext);
     }
+    else if (typeStr == "long") {
+        type = Type::getInt64Ty(*theContext);
+    }
+    else if (typeStr == "double") {
+        type = Type::getDoubleTy(*theContext);
+    }
+    else if (typeStr == "bool") {
+        type = Type::getInt1Ty(*theContext);
+    }
     Type* matrixType = ArrayType::get(ArrayType::get(type, matrixSize.second), matrixSize.first);
     AllocaInst* allocaInst = dyn_cast<AllocaInst>(v);
     int offset = (matrixSize.first == 3 && matrixSize.second == 3) ? 3 : 2;
@@ -603,7 +653,27 @@ std::any LLVMGenerator::visitStringLiteral(KiepskiLangParser::StringLiteralConte
     std::string strValue = ctx->STRING()->getText();
     strValue = strValue.substr(1, strValue.size() - 2);
 
-    return strValue;
+    auto constStr = ConstantDataArray::getString(*theContext, strValue);
+    StructType* stringStructTy = StructType::getTypeByName(*theContext, "string");
+    if (!stringStructTy) {
+        Type* i8PtrTy = PointerType::get(Type::getInt8Ty(*theContext), 0);
+        Type* i32Ty = Type::getInt32Ty(*theContext);
+        std::vector<Type*> elements = { i8PtrTy, i32Ty };
+        stringStructTy = StructType::create(*theContext, elements, "string");
+    }
+    GlobalVariable* strGlobal = new GlobalVariable(*theModule, constStr->getType(), true, llvm::GlobalValue::PrivateLinkage, (Constant*)constStr, ".str");
+    strGlobal->setAlignment(Align(1));
+
+    Value* dataPtr = builder->CreateInBoundsGEP(
+        constStr->getType(),
+        strGlobal,
+        { builder->getInt32(0), builder->getInt32(0) },
+        "str_ptr"
+    );
+    Value* lenPtr = ConstantInt::get(Type::getInt32Ty(*theContext), strValue.size());
+    
+    auto stringStruct = ConstantStruct::get(stringStructTy, { (Constant*)dataPtr, (Constant*)lenPtr });
+    return (Value*)stringStruct;
 }
 
 std::any LLVMGenerator::visitMulExpr(KiepskiLangParser::MulExprContext* ctx) {
@@ -703,6 +773,7 @@ std::any LLVMGenerator::visitVarReference(KiepskiLangParser::VarReferenceContext
     }
 
     AllocaInst* allocaInst = dyn_cast<AllocaInst>(v);
+    StructType* stringStructTy = StructType::getTypeByName(*theContext, "string");
     if (allocaInst->getAllocatedType() == Type::getInt32Ty(*theContext)) {
         return (Value*)builder->CreateLoad(Type::getInt32Ty(*theContext), v, varName + "_val");
     }
@@ -717,6 +788,9 @@ std::any LLVMGenerator::visitVarReference(KiepskiLangParser::VarReferenceContext
     }
     if (allocaInst->getAllocatedType() == Type::getDoubleTy(*theContext)) {
         return (Value*)builder->CreateLoad(Type::getDoubleTy(*theContext), v, varName + "_val");
+    }
+    if (allocaInst->getAllocatedType() == stringStructTy) {
+        return (Value*)builder->CreateLoad(stringStructTy, v, varName + "_val");
     }
     if (allocaInst->getAllocatedType()->isArrayTy()) {
         return (Value*)builder->CreateBitCast(v, allocaInst->getAllocatedType()->getArrayElementType()->getPointerTo(), varName + "_ptr");
@@ -757,6 +831,9 @@ std::any LLVMGenerator::visitArrayInit(KiepskiLangParser::ArrayInitContext* ctx)
         }
         else if (typeName == "double") {
             arrayType = Type::getDoubleTy(*theContext);
+        }
+        else if (typeName == "bool") {
+            arrayType = Type::getInt1Ty(*theContext);
         }
         else {
             logErrorV("Niezgodny typ");
@@ -820,6 +897,9 @@ std::any LLVMGenerator::visitMatrixInit(KiepskiLangParser::MatrixInitContext* ct
         }
         else if (typeName == "double") {
             matrixType = Type::getDoubleTy(*theContext);
+        }
+        else if (typeName == "bool") {
+            matrixType = Type::getInt1Ty(*theContext);
         }
         else {
             logErrorV("Niezgodny typ");
