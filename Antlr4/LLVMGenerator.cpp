@@ -20,7 +20,7 @@ std::map<std::string, std::pair<int, int>> LLVMGenerator::matrixSizes;
 
 Value* LLVMGenerator::logErrorV(std::string str) {
     std::cerr << "Error: " << str << std::endl;
-    return nullptr;
+    throw CompilationException();
 }
 
 std::any LLVMGenerator::visitProgram(KiepskiLangParser::ProgramContext* ctx) {
@@ -326,8 +326,8 @@ std::any LLVMGenerator::visitPrint(KiepskiLangParser::PrintContext* ctx) {
 std::any LLVMGenerator::visitRead(KiepskiLangParser::ReadContext* ctx) {
     std::string varName = ctx->ID()->getText();
 
-    Value* v = namedValues[varName].first;
-    if (!v) {
+    Value* val = namedValues[varName].first;
+    if (!val) {
         return logErrorV("Unknown variable name: " + varName);
     }
 
@@ -342,9 +342,57 @@ std::any LLVMGenerator::visitRead(KiepskiLangParser::ReadContext* ctx) {
             scanfType, Function::ExternalLinkage, "scanf", *theModule
         );
     }
-    //TODO: SCANF DLA ROZNYCH TYPOW
-    llvm::Value* formatStr = builder->CreateGlobalStringPtr("%d", "fmt");
-    builder->CreateCall(scanfFunc, { formatStr, v });
+    Value* formatStr = nullptr;
+    auto* allocaInst = llvm::dyn_cast<llvm::AllocaInst>(val);
+    StructType* stringStructTy = StructType::getTypeByName(*theContext, "string");
+    if (allocaInst->getAllocatedType() == Type::getInt32Ty(*theContext) || allocaInst->getAllocatedType() == Type::getInt1Ty(*theContext)) {
+        formatStr = theModule->getNamedGlobal("intReadFormat");
+        if (!formatStr) {
+            formatStr = builder->CreateGlobalStringPtr("%d", "intReadFormat");
+        }
+    }
+    else if (allocaInst->getAllocatedType() == Type::getInt64Ty(*theContext)) {
+        formatStr = theModule->getNamedGlobal("longReadFormat");
+        if (!formatStr) {
+            formatStr = builder->CreateGlobalStringPtr("%lld", "longReadFormat");
+        }
+    }
+    else if (allocaInst->getAllocatedType()->isFloatingPointTy()) {
+        formatStr = theModule->getNamedGlobal("doubleReadFormat");
+        if (!formatStr) {
+            formatStr = builder->CreateGlobalStringPtr("%f", "doubleReadFormat");
+        }
+    }
+    else if (allocaInst->getAllocatedType() == stringStructTy) {
+        formatStr = theModule->getNamedGlobal("stringReadFormat");
+        if (!formatStr) {
+            formatStr = builder->CreateGlobalStringPtr("%s", "stringReadFormat");
+        }
+        int bufferSize = 256;
+        Value* buffer = builder->CreateAlloca(ArrayType::get(Type::getInt8Ty(*theContext), bufferSize), nullptr, "scanf_builder");
+        Value* bufferPtr = builder->CreateInBoundsGEP(ArrayType::get(Type::getInt8Ty(*theContext), bufferSize), buffer, { builder->getInt32(0), builder->getInt32(0) }, "buf_ptr");
+        builder->CreateCall(scanfFunc, { formatStr, bufferPtr });
+
+        Function* strlenFunc = theModule->getFunction("strlen");
+        if(!strlenFunc) {
+            FunctionType* strlenType = FunctionType::get(Type::getInt32Ty(*theContext), { PointerType::get(Type::getInt8Ty(*theContext), 0) }, false);
+            strlenFunc = Function::Create(strlenType, Function::ExternalLinkage, "strlen", *theModule);
+        }
+
+        Value* length = builder->CreateCall(strlenFunc, bufferPtr, "strlen_result");
+
+        Value* result = UndefValue::get(stringStructTy);
+        result = builder->CreateInsertValue(result, bufferPtr, { 0 }, "str_data");
+        result = builder->CreateInsertValue(result, length, { 1 }, "str_len");
+        Value* dataPtr = builder->CreateExtractValue(result, { 0 }, "loaded_data_ptr");
+        Value* dataPtrAddr = builder->CreateStructGEP(stringStructTy, val, 0, "data_ptr_addr");
+        builder->CreateStore(dataPtr, dataPtrAddr);
+        Value* lenPtr = builder->CreateExtractValue(result, { 1 }, "loaded_length_ptr");
+        Value* lenAddr = builder->CreateStructGEP(stringStructTy, val, 1, "length_addr");
+        builder->CreateStore(lenPtr, lenAddr);
+        return nullptr;
+    }
+    builder->CreateCall(scanfFunc, { formatStr, val });
     return nullptr;
 }
 
@@ -499,6 +547,7 @@ std::any LLVMGenerator::visitAddExpr(KiepskiLangParser::AddExprContext* ctx) {
         return nullptr;
     }
 
+    StructType* stringStructTy = StructType::getTypeByName(*theContext, "string");
     std::string op = ctx->children[1]->getText();
     if (op == "+") {
         if (l->getType()->isIntegerTy() && r->getType()->isIntegerTy()) {
@@ -536,6 +585,39 @@ std::any LLVMGenerator::visitAddExpr(KiepskiLangParser::AddExprContext* ctx) {
                 r = builder->CreateFPExt(r, Type::getDoubleTy(*theContext));
             }
             return (Value*)builder->CreateFAdd(l, r, "addtmp");
+        }
+        else if (l->getType() == stringStructTy && r->getType() == stringStructTy) {
+            Value* ldata = builder->CreateExtractValue(l, { 0 }, "str1_data");
+            Value* llen = builder->CreateExtractValue(l, { 1 }, "str1_len");
+
+            Value* rdata = builder->CreateExtractValue(r, { 0 }, "str2_data");
+            Value* rlen = builder->CreateExtractValue(r, { 1 }, "str2_len");
+
+            Value* totalLen = builder->CreateAdd(llen, rlen, "total_len");
+            Function* mallocFunc = theModule->getFunction("malloc");
+            if (!mallocFunc) {
+                FunctionType* mallocType = FunctionType::get(PointerType::get(Type::getInt8Ty(*theContext), 0), { Type::getInt32Ty(*theContext)}, false);
+                mallocFunc = Function::Create(mallocType, Function::ExternalLinkage, "malloc", *theModule);
+            }
+            Value* newBuf = builder->CreateCall(mallocFunc, { totalLen }, "concat_buf");
+            Function* memcpyFunc = theModule->getFunction("memcpy");
+            if (!memcpyFunc) {
+                Type* args[] = { PointerType::get(Type::getInt8Ty(*theContext), 0), PointerType::get(Type::getInt8Ty(*theContext), 0), Type::getInt32Ty(*theContext), Type::getInt1Ty(*theContext) };
+                FunctionType* memcpyType = FunctionType::get(Type::getVoidTy(*theContext), args, false);
+                memcpyFunc = Function::Create(memcpyType, Function::ExternalLinkage, "memcpy", *theModule);
+            }
+            builder->CreateCall(memcpyFunc, { newBuf, ldata, llen, builder->getInt1(false) });
+            Value* offsetPtr = builder->CreateInBoundsGEP(
+                Type::getInt8Ty(*theContext),
+                newBuf,
+                llen,
+                "second_part_ptr"
+            );
+            builder->CreateCall(memcpyFunc, { offsetPtr, rdata, rlen, builder->getInt1(false) });
+            Value* newStr = UndefValue::get(stringStructTy);
+            newStr = builder->CreateInsertValue(newStr, newBuf, { 0 }, "concat_data");
+            newStr = builder->CreateInsertValue(newStr, totalLen, { 1 }, "concat_len");
+            return newStr;
         }
     }
     else if (op == "-") {
@@ -792,8 +874,8 @@ std::any LLVMGenerator::visitVarReference(KiepskiLangParser::VarReferenceContext
     if (allocaInst->getAllocatedType() == stringStructTy) {
         return (Value*)builder->CreateLoad(stringStructTy, v, varName + "_val");
     }
-    if (allocaInst->getAllocatedType()->isArrayTy()) {
-        return (Value*)builder->CreateBitCast(v, allocaInst->getAllocatedType()->getArrayElementType()->getPointerTo(), varName + "_ptr");
+    if (allocaInst->getAllocatedType()->isPointerTy()) {
+        return (Value*)builder->CreateLoad(allocaInst->getAllocatedType(), v,  varName + "_ptr");
     }
     return nullptr;
 }

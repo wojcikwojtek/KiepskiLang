@@ -15,6 +15,13 @@
 
 using namespace llvm;
 
+class CompilationException : public std::exception {
+public:
+    std::string what() {
+        return "Compilation Error";
+    }
+};
+
 /**
  * This class provides an empty implementation of KiepskiLangVisitor, which can be
  * extended to create a visitor which only needs to handle a subset of the available methods.

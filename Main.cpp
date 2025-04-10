@@ -10,23 +10,33 @@ using namespace antlr4;
 
 int main()
 {
-    std::ifstream stream;
-    stream.open("C:\\Users\\wojte\\Desktop\\Wojtek\\studiapw\\JFiK\\KiepskiLang\\example.kiepski");
+    try {
+        std::ifstream stream;
+        stream.open("C:\\Users\\wojte\\Desktop\\Wojtek\\studiapw\\JFiK\\KiepskiLang\\example.kiepski");
 
-    ANTLRInputStream input(stream);
-    KiepskiLangLexer lexer(&input);
-    CommonTokenStream tokens(&lexer);
-    KiepskiLangParser parser(&tokens);
+        ANTLRInputStream input(stream);
+        KiepskiLangLexer lexer(&input);
+        CommonTokenStream tokens(&lexer);
+        KiepskiLangParser parser(&tokens);
 
-    KiepskiLangErrorListener errorListener;
-    parser.removeErrorListeners();
-    parser.addErrorListener(&errorListener);
+        KiepskiLangErrorListener errorListener;
+        lexer.removeErrorListeners();
+        lexer.addErrorListener(&errorListener);
+        parser.removeErrorListeners();
+        parser.addErrorListener(&errorListener);
 
-    KiepskiLangParser::ProgramContext* tree = parser.program();
+        KiepskiLangParser::ProgramContext* tree = parser.program();
 
-    // Opcjonalnie wypisz drzewo
-    std::cout << tree->toStringTree(&parser) << std::endl;
+        // Opcjonalnie wypisz drzewo
+        //std::cout << tree->toStringTree(&parser) << std::endl;
 
-    LLVMGenerator visitor;
-    visitor.visitProgram(tree);
+        LLVMGenerator visitor;
+        visitor.visitProgram(tree);
+    }
+    catch (SyntaxException e) {
+        std::cout << e.what() << std::endl;
+    }
+    catch (CompilationException e) {
+        std::cout << e.what() << std::endl;
+    }
 }
