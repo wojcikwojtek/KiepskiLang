@@ -49,6 +49,15 @@ public:
   virtual void enterRead(KiepskiLangParser::ReadContext * /*ctx*/) override { }
   virtual void exitRead(KiepskiLangParser::ReadContext * /*ctx*/) override { }
 
+  virtual void enterIfStatement(KiepskiLangParser::IfStatementContext * /*ctx*/) override { }
+  virtual void exitIfStatement(KiepskiLangParser::IfStatementContext * /*ctx*/) override { }
+
+  virtual void enterElseBlock(KiepskiLangParser::ElseBlockContext * /*ctx*/) override { }
+  virtual void exitElseBlock(KiepskiLangParser::ElseBlockContext * /*ctx*/) override { }
+
+  virtual void enterWhileStatement(KiepskiLangParser::WhileStatementContext * /*ctx*/) override { }
+  virtual void exitWhileStatement(KiepskiLangParser::WhileStatementContext * /*ctx*/) override { }
+
   virtual void enterLogicBinaryExpr(KiepskiLangParser::LogicBinaryExprContext * /*ctx*/) override { }
   virtual void exitLogicBinaryExpr(KiepskiLangParser::LogicBinaryExprContext * /*ctx*/) override { }
 

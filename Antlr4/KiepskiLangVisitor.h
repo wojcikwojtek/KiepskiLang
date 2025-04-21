@@ -41,6 +41,12 @@ public:
 
     virtual std::any visitRead(KiepskiLangParser::ReadContext *context) = 0;
 
+    virtual std::any visitIfStatement(KiepskiLangParser::IfStatementContext *context) = 0;
+
+    virtual std::any visitElseBlock(KiepskiLangParser::ElseBlockContext *context) = 0;
+
+    virtual std::any visitWhileStatement(KiepskiLangParser::WhileStatementContext *context) = 0;
+
     virtual std::any visitLogicBinaryExpr(KiepskiLangParser::LogicBinaryExprContext *context) = 0;
 
     virtual std::any visitIntLiteral(KiepskiLangParser::IntLiteralContext *context) = 0;

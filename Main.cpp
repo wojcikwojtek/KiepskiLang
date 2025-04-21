@@ -28,7 +28,7 @@ int main()
         KiepskiLangParser::ProgramContext* tree = parser.program();
 
         // Opcjonalnie wypisz drzewo
-        //std::cout << tree->toStringTree(&parser) << std::endl;
+        std::cout << tree->toStringTree(&parser) << std::endl;
 
         LLVMGenerator visitor;
         visitor.visitProgram(tree);

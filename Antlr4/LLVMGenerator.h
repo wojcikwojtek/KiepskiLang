@@ -59,6 +59,12 @@ public:
 
     virtual std::any visitRead(KiepskiLangParser::ReadContext* ctx) override;
 
+    virtual std::any visitIfStatement(KiepskiLangParser::IfStatementContext* ctx) override;
+
+    virtual std::any visitElseBlock(KiepskiLangParser::ElseBlockContext* ctx) override;
+
+    virtual std::any visitWhileStatement(KiepskiLangParser::WhileStatementContext* ctx) override;
+
     virtual std::any visitLogicBinaryExpr(KiepskiLangParser::LogicBinaryExprContext* ctx) override;
 
     virtual std::any visitArrayAccessExpr(KiepskiLangParser::ArrayAccessExprContext* ctx) override;

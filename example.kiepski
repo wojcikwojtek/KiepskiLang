@@ -1,3 +1,8 @@
 START PROGRAM:
-PRINT "Hello " + "World!"
+int i = 0
+WHILE i < 5
+PRINT "dupa"
+i = i + 1
+END
+
 END PROGRAM

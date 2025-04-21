@@ -87,6 +87,12 @@ std::any LLVMGenerator::visitStatement(KiepskiLangParser::StatementContext* ctx)
     if (ctx->expr()) {
         return visitExpr(ctx->expr());
     }
+    if (ctx->ifStatement()) {
+        return visitIfStatement(ctx->ifStatement());
+    }
+    if (ctx->whileStatement()) {
+        return visitWhileStatement(ctx->whileStatement());
+    }
     return nullptr;
 }
 
@@ -396,6 +402,85 @@ std::any LLVMGenerator::visitRead(KiepskiLangParser::ReadContext* ctx) {
     return nullptr;
 }
 
+std::any LLVMGenerator::visitIfStatement(KiepskiLangParser::IfStatementContext* ctx) {
+    Value* cond = std::any_cast<Value*>(visitExpr(ctx->expr()));
+    if (!cond) {
+        return logErrorV("Blad w warunku if");
+    }
+
+    //TODO obsługa sprawdzania typu
+    if (ctx->elseBlock()) {
+        Function* currFunc = builder->GetInsertBlock()->getParent();
+        BasicBlock* ifExpr = BasicBlock::Create(*theContext, "if_expr", currFunc);
+        BasicBlock* elseExpr = BasicBlock::Create(*theContext, "else_expr", currFunc);
+        BasicBlock* merge = BasicBlock::Create(*theContext, "merge", currFunc);
+
+        builder->CreateCondBr(cond, ifExpr, elseExpr);
+
+        builder->SetInsertPoint(ifExpr);
+        for (auto statement : ctx->statement()) {
+            visitStatement(statement);
+        }
+        builder->CreateBr(merge);
+
+        builder->SetInsertPoint(elseExpr);
+        visitElseBlock(ctx->elseBlock());
+        builder->CreateBr(merge);
+
+        builder->SetInsertPoint(merge);
+        return nullptr;
+    }
+    else {
+        Function* currFunc = builder->GetInsertBlock()->getParent();
+        BasicBlock* ifExpr = BasicBlock::Create(*theContext, "if_expr", currFunc);
+        BasicBlock* merge = BasicBlock::Create(*theContext, "merge", currFunc);
+
+        builder->CreateCondBr(cond, ifExpr, merge);
+
+        builder->SetInsertPoint(ifExpr);
+        for (auto statement : ctx->statement()) {
+            visitStatement(statement);
+        }
+        builder->CreateBr(merge);
+
+        builder->SetInsertPoint(merge);
+        return nullptr;
+    }
+   
+}
+
+std::any LLVMGenerator::visitElseBlock(KiepskiLangParser::ElseBlockContext* ctx) {
+    for (auto statement : ctx->statement()) {
+        visitStatement(statement);
+    }
+    return nullptr;
+}
+
+std::any LLVMGenerator::visitWhileStatement(KiepskiLangParser::WhileStatementContext* ctx) {
+    Function* currFunc = builder->GetInsertBlock()->getParent();
+    BasicBlock* whileCond = BasicBlock::Create(*theContext, "while_cond", currFunc);
+    BasicBlock* whileBody = BasicBlock::Create(*theContext, "while_body", currFunc);
+    BasicBlock* whileEnd = BasicBlock::Create(*theContext, "while_end", currFunc);
+
+    builder->CreateBr(whileCond);
+    builder->SetInsertPoint(whileCond);
+    Value* cond = std::any_cast<Value*>(visitExpr(ctx->expr()));
+    if (!cond) {
+        return logErrorV("Blad w warunku pętli while");
+    }
+
+    builder->CreateCondBr(cond, whileBody, whileEnd);
+
+    builder->SetInsertPoint(whileBody);
+    for (auto statement : ctx->statement()) {
+        visitStatement(statement);
+    }
+    builder->CreateBr(whileCond);
+
+    builder->SetInsertPoint(whileEnd);
+    return nullptr;
+}
+
 std::any LLVMGenerator::visitExpr(KiepskiLangParser::ExprContext* ctx) {
     if (dynamic_cast<KiepskiLangParser::MulExprContext*>(ctx)) {
         return visitMulExpr(dynamic_cast<KiepskiLangParser::MulExprContext*>(ctx));
@@ -670,6 +755,245 @@ std::any LLVMGenerator::visitIntLiteral(KiepskiLangParser::IntLiteralContext* ct
 }
 
 std::any LLVMGenerator::visitComparisonExpr(KiepskiLangParser::ComparisonExprContext* ctx) {
+    auto leftexpr = ctx->expr(0);
+    auto rightexpr = ctx->expr(1);
+
+    Value* l = std::any_cast<Value*>(visitExpr(leftexpr));
+    Value* r = std::any_cast<Value*>(visitExpr(rightexpr));
+
+    if (!l || !r) {
+        return nullptr;
+    }
+
+    std::string op = ctx->children[1]->getText();
+    if (op == "==") {
+        if (l->getType()->isIntegerTy() && r->getType()->isIntegerTy()) {
+            if (l->getType() == Type::getInt32Ty(*theContext) && r->getType() == Type::getInt64Ty(*theContext)) {
+                l = builder->CreateSExt(l, Type::getInt64Ty(*theContext));
+            }
+            else if (l->getType() == Type::getInt64Ty(*theContext) && r->getType() == Type::getInt32Ty(*theContext)) {
+                r = builder->CreateSExt(r, Type::getInt64Ty(*theContext));
+            }
+            return (Value*)builder->CreateICmpEQ(l, r, "eqtmp");
+        }
+        else if (l->getType()->isIntegerTy() && r->getType()->isFloatingPointTy()) {
+            if (r->getType() == Type::getFloatTy(*theContext)) {
+                l = builder->CreateCast(Instruction::SIToFP, l, Type::getFloatTy(*theContext));
+            }
+            else {
+                l = builder->CreateCast(Instruction::SIToFP, l, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOEQ(l, r, "eqtmp");
+        }
+        else if (l->getType()->isFloatingPointTy() && r->getType()->isIntegerTy()) {
+            if (l->getType() == Type::getFloatTy(*theContext)) {
+                r = builder->CreateCast(Instruction::SIToFP, r, Type::getFloatTy(*theContext));
+            }
+            else {
+                r = builder->CreateCast(Instruction::SIToFP, r, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOEQ(l, r, "eqtmp");
+        }
+        else if (l->getType()->isFloatingPointTy() && r->getType()->isFloatingPointTy()) {
+            if (l->getType() == Type::getFloatTy(*theContext) && r->getType() == Type::getDoubleTy(*theContext)) {
+                l = builder->CreateFPExt(l, Type::getDoubleTy(*theContext));
+            }
+            else if (l->getType() == Type::getDoubleTy(*theContext) && r->getType() == Type::getFloatTy(*theContext)) {
+                r = builder->CreateFPExt(r, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOEQ(l, r, "eqtmp");
+        }
+    }
+    else if (op == "!=") {
+        if (l->getType()->isIntegerTy() && r->getType()->isIntegerTy()) {
+            if (l->getType() == Type::getInt32Ty(*theContext) && r->getType() == Type::getInt64Ty(*theContext)) {
+                l = builder->CreateSExt(l, Type::getInt64Ty(*theContext));
+            }
+            else if (l->getType() == Type::getInt64Ty(*theContext) && r->getType() == Type::getInt32Ty(*theContext)) {
+                r = builder->CreateSExt(r, Type::getInt64Ty(*theContext));
+            }
+            return (Value*)builder->CreateICmpNE(l, r, "netmp");
+        }
+        else if (l->getType()->isIntegerTy() && r->getType()->isFloatingPointTy()) {
+            if (r->getType() == Type::getFloatTy(*theContext)) {
+                l = builder->CreateCast(Instruction::SIToFP, l, Type::getFloatTy(*theContext));
+            }
+            else {
+                l = builder->CreateCast(Instruction::SIToFP, l, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpONE(l, r, "netmp");
+        }
+        else if (l->getType()->isFloatingPointTy() && r->getType()->isIntegerTy()) {
+            if (l->getType() == Type::getFloatTy(*theContext)) {
+                r = builder->CreateCast(Instruction::SIToFP, r, Type::getFloatTy(*theContext));
+            }
+            else {
+                r = builder->CreateCast(Instruction::SIToFP, r, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpONE(l, r, "netmp");
+        }
+        else if (l->getType()->isFloatingPointTy() && r->getType()->isFloatingPointTy()) {
+            if (l->getType() == Type::getFloatTy(*theContext) && r->getType() == Type::getDoubleTy(*theContext)) {
+                l = builder->CreateFPExt(l, Type::getDoubleTy(*theContext));
+            }
+            else if (l->getType() == Type::getDoubleTy(*theContext) && r->getType() == Type::getFloatTy(*theContext)) {
+                r = builder->CreateFPExt(r, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpONE(l, r, "netmp");
+        }
+    }
+    else if (op == "<") {
+        if (l->getType()->isIntegerTy() && r->getType()->isIntegerTy()) {
+            if (l->getType() == Type::getInt32Ty(*theContext) && r->getType() == Type::getInt64Ty(*theContext)) {
+                l = builder->CreateSExt(l, Type::getInt64Ty(*theContext));
+            }
+            else if (l->getType() == Type::getInt64Ty(*theContext) && r->getType() == Type::getInt32Ty(*theContext)) {
+                r = builder->CreateSExt(r, Type::getInt64Ty(*theContext));
+            }
+            return (Value*)builder->CreateICmpSLT(l, r, "lttmp");
+        }
+        else if (l->getType()->isIntegerTy() && r->getType()->isFloatingPointTy()) {
+            if (r->getType() == Type::getFloatTy(*theContext)) {
+                l = builder->CreateCast(Instruction::SIToFP, l, Type::getFloatTy(*theContext));
+            }
+            else {
+                l = builder->CreateCast(Instruction::SIToFP, l, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOLT(l, r, "lttmp");
+        }
+        else if (l->getType()->isFloatingPointTy() && r->getType()->isIntegerTy()) {
+            if (l->getType() == Type::getFloatTy(*theContext)) {
+                r = builder->CreateCast(Instruction::SIToFP, r, Type::getFloatTy(*theContext));
+            }
+            else {
+                r = builder->CreateCast(Instruction::SIToFP, r, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOLT(l, r, "lttmp");
+        }
+        else if (l->getType()->isFloatingPointTy() && r->getType()->isFloatingPointTy()) {
+            if (l->getType() == Type::getFloatTy(*theContext) && r->getType() == Type::getDoubleTy(*theContext)) {
+                l = builder->CreateFPExt(l, Type::getDoubleTy(*theContext));
+            }
+            else if (l->getType() == Type::getDoubleTy(*theContext) && r->getType() == Type::getFloatTy(*theContext)) {
+                r = builder->CreateFPExt(r, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOLT(l, r, "lttmp");
+        }
+    }
+    else if (op == "<=") {
+        if (l->getType()->isIntegerTy() && r->getType()->isIntegerTy()) {
+            if (l->getType() == Type::getInt32Ty(*theContext) && r->getType() == Type::getInt64Ty(*theContext)) {
+                l = builder->CreateSExt(l, Type::getInt64Ty(*theContext));
+            }
+            else if (l->getType() == Type::getInt64Ty(*theContext) && r->getType() == Type::getInt32Ty(*theContext)) {
+                r = builder->CreateSExt(r, Type::getInt64Ty(*theContext));
+            }
+            return (Value*)builder->CreateICmpSLE(l, r, "letmp");
+        }
+        else if (l->getType()->isIntegerTy() && r->getType()->isFloatingPointTy()) {
+            if (r->getType() == Type::getFloatTy(*theContext)) {
+                l = builder->CreateCast(Instruction::SIToFP, l, Type::getFloatTy(*theContext));
+            }
+            else {
+                l = builder->CreateCast(Instruction::SIToFP, l, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOLE(l, r, "letmp");
+        }
+        else if (l->getType()->isFloatingPointTy() && r->getType()->isIntegerTy()) {
+            if (l->getType() == Type::getFloatTy(*theContext)) {
+                r = builder->CreateCast(Instruction::SIToFP, r, Type::getFloatTy(*theContext));
+            }
+            else {
+                r = builder->CreateCast(Instruction::SIToFP, r, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOLE(l, r, "letmp");
+        }
+        else if (l->getType()->isFloatingPointTy() && r->getType()->isFloatingPointTy()) {
+            if (l->getType() == Type::getFloatTy(*theContext) && r->getType() == Type::getDoubleTy(*theContext)) {
+                l = builder->CreateFPExt(l, Type::getDoubleTy(*theContext));
+            }
+            else if (l->getType() == Type::getDoubleTy(*theContext) && r->getType() == Type::getFloatTy(*theContext)) {
+                r = builder->CreateFPExt(r, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOLE(l, r, "letmp");
+        }
+    }
+    else if (op == ">") {
+        if (l->getType()->isIntegerTy() && r->getType()->isIntegerTy()) {
+            if (l->getType() == Type::getInt32Ty(*theContext) && r->getType() == Type::getInt64Ty(*theContext)) {
+                l = builder->CreateSExt(l, Type::getInt64Ty(*theContext));
+            }
+            else if (l->getType() == Type::getInt64Ty(*theContext) && r->getType() == Type::getInt32Ty(*theContext)) {
+                r = builder->CreateSExt(r, Type::getInt64Ty(*theContext));
+            }
+            return (Value*)builder->CreateICmpSGT(l, r, "gttmp");
+        }
+        else if (l->getType()->isIntegerTy() && r->getType()->isFloatingPointTy()) {
+            if (r->getType() == Type::getFloatTy(*theContext)) {
+                l = builder->CreateCast(Instruction::SIToFP, l, Type::getFloatTy(*theContext));
+            }
+            else {
+                l = builder->CreateCast(Instruction::SIToFP, l, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOGT(l, r, "gttmp");
+        }
+        else if (l->getType()->isFloatingPointTy() && r->getType()->isIntegerTy()) {
+            if (l->getType() == Type::getFloatTy(*theContext)) {
+                r = builder->CreateCast(Instruction::SIToFP, r, Type::getFloatTy(*theContext));
+            }
+            else {
+                r = builder->CreateCast(Instruction::SIToFP, r, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOGT(l, r, "gttmp");
+        }
+        else if (l->getType()->isFloatingPointTy() && r->getType()->isFloatingPointTy()) {
+            if (l->getType() == Type::getFloatTy(*theContext) && r->getType() == Type::getDoubleTy(*theContext)) {
+                l = builder->CreateFPExt(l, Type::getDoubleTy(*theContext));
+            }
+            else if (l->getType() == Type::getDoubleTy(*theContext) && r->getType() == Type::getFloatTy(*theContext)) {
+                r = builder->CreateFPExt(r, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOGT(l, r, "gttmp");
+        }
+    }
+    else if (op == ">=") {
+        if (l->getType()->isIntegerTy() && r->getType()->isIntegerTy()) {
+            if (l->getType() == Type::getInt32Ty(*theContext) && r->getType() == Type::getInt64Ty(*theContext)) {
+                l = builder->CreateSExt(l, Type::getInt64Ty(*theContext));
+            }
+            else if (l->getType() == Type::getInt64Ty(*theContext) && r->getType() == Type::getInt32Ty(*theContext)) {
+                r = builder->CreateSExt(r, Type::getInt64Ty(*theContext));
+            }
+            return (Value*)builder->CreateICmpSGE(l, r, "getmp");
+        }
+        else if (l->getType()->isIntegerTy() && r->getType()->isFloatingPointTy()) {
+            if (r->getType() == Type::getFloatTy(*theContext)) {
+                l = builder->CreateCast(Instruction::SIToFP, l, Type::getFloatTy(*theContext));
+            }
+            else {
+                l = builder->CreateCast(Instruction::SIToFP, l, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOGE(l, r, "getmp");
+        }
+        else if (l->getType()->isFloatingPointTy() && r->getType()->isIntegerTy()) {
+            if (l->getType() == Type::getFloatTy(*theContext)) {
+                r = builder->CreateCast(Instruction::SIToFP, r, Type::getFloatTy(*theContext));
+            }
+            else {
+                r = builder->CreateCast(Instruction::SIToFP, r, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOGE(l, r, "getmp");
+        }
+        else if (l->getType()->isFloatingPointTy() && r->getType()->isFloatingPointTy()) {
+            if (l->getType() == Type::getFloatTy(*theContext) && r->getType() == Type::getDoubleTy(*theContext)) {
+                l = builder->CreateFPExt(l, Type::getDoubleTy(*theContext));
+            }
+            else if (l->getType() == Type::getDoubleTy(*theContext) && r->getType() == Type::getFloatTy(*theContext)) {
+                r = builder->CreateFPExt(r, Type::getDoubleTy(*theContext));
+            }
+            return (Value*)builder->CreateFCmpOGE(l, r, "getmp");
+        }
+    }
     return nullptr;
 }
 

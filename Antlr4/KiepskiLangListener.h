@@ -47,6 +47,15 @@ public:
   virtual void enterRead(KiepskiLangParser::ReadContext *ctx) = 0;
   virtual void exitRead(KiepskiLangParser::ReadContext *ctx) = 0;
 
+  virtual void enterIfStatement(KiepskiLangParser::IfStatementContext *ctx) = 0;
+  virtual void exitIfStatement(KiepskiLangParser::IfStatementContext *ctx) = 0;
+
+  virtual void enterElseBlock(KiepskiLangParser::ElseBlockContext *ctx) = 0;
+  virtual void exitElseBlock(KiepskiLangParser::ElseBlockContext *ctx) = 0;
+
+  virtual void enterWhileStatement(KiepskiLangParser::WhileStatementContext *ctx) = 0;
+  virtual void exitWhileStatement(KiepskiLangParser::WhileStatementContext *ctx) = 0;
+
   virtual void enterLogicBinaryExpr(KiepskiLangParser::LogicBinaryExprContext *ctx) = 0;
   virtual void exitLogicBinaryExpr(KiepskiLangParser::LogicBinaryExprContext *ctx) = 0;
 

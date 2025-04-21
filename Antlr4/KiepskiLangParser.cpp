@@ -54,69 +54,86 @@ void kiepskilangParserInitialize() {
   auto staticData = std::make_unique<KiepskiLangParserStaticData>(
     std::vector<std::string>{
       "program", "start", "statement", "varDecl", "varAssign", "print", 
-      "read", "expr", "arrayInit", "matrixInit"
+      "read", "ifStatement", "elseBlock", "whileStatement", "expr", "arrayInit", 
+      "matrixInit"
     },
     std::vector<std::string>{
       "", "'='", "'[]'", "'[][]'", "'['", "']'", "']['", "'PRINT'", "'READ'", 
-      "'*'", "'/'", "'+'", "'-'", "'=='", "'!='", "'<'", "'<='", "'>'", 
-      "'>='", "'AND'", "'OR'", "'XOR'", "'NEG'", "'('", "')'", "','", "'START PROGRAM:'", 
-      "'END PROGRAM'"
+      "'IF'", "'END'", "'ELSE'", "'WHILE'", "'*'", "'/'", "'+'", "'-'", 
+      "'=='", "'!='", "'<'", "'<='", "'>'", "'>='", "'AND'", "'OR'", "'XOR'", 
+      "'NEG'", "'('", "')'", "','", "'START PROGRAM:'", "'END PROGRAM'"
     },
     std::vector<std::string>{
       "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", "", 
-      "", "", "", "", "", "", "", "", "", "STARTPROG", "ENDPROG", "NEWLINE", 
-      "TYPE", "BOOL", "ID", "INT", "FLOAT", "STRING", "WS"
+      "", "", "", "", "", "", "", "", "", "", "", "", "", "STARTPROG", "ENDPROG", 
+      "NEWLINE", "TYPE", "BOOL", "ID", "INT", "FLOAT", "STRING", "WS"
     }
   );
   static const int32_t serializedATNSegment[] = {
-  	4,1,35,154,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
-  	7,7,7,2,8,7,8,2,9,7,9,1,0,1,0,1,1,1,1,1,1,5,1,26,8,1,10,1,12,1,29,9,1,
-  	1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,3,
-  	2,48,8,2,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,3,3,
-  	64,8,3,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,
-  	4,1,4,3,4,83,8,4,1,5,1,5,1,5,1,6,1,6,1,6,1,7,1,7,1,7,1,7,1,7,1,7,1,7,
-  	1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,3,7,113,8,
-  	7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,1,7,5,7,127,8,7,10,7,12,
-  	7,130,9,7,1,8,1,8,1,8,1,8,5,8,136,8,8,10,8,12,8,139,9,8,1,8,1,8,1,9,1,
-  	9,1,9,1,9,5,9,147,8,9,10,9,12,9,150,9,9,1,9,1,9,1,9,0,1,14,10,0,2,4,6,
-  	8,10,12,14,16,18,0,4,1,0,9,10,1,0,11,12,1,0,13,18,1,0,19,21,166,0,20,
-  	1,0,0,0,2,22,1,0,0,0,4,47,1,0,0,0,6,63,1,0,0,0,8,82,1,0,0,0,10,84,1,0,
-  	0,0,12,87,1,0,0,0,14,112,1,0,0,0,16,131,1,0,0,0,18,142,1,0,0,0,20,21,
-  	3,2,1,0,21,1,1,0,0,0,22,23,5,26,0,0,23,27,5,28,0,0,24,26,3,4,2,0,25,24,
-  	1,0,0,0,26,29,1,0,0,0,27,25,1,0,0,0,27,28,1,0,0,0,28,30,1,0,0,0,29,27,
-  	1,0,0,0,30,31,5,27,0,0,31,3,1,0,0,0,32,33,3,6,3,0,33,34,5,28,0,0,34,48,
-  	1,0,0,0,35,36,3,8,4,0,36,37,5,28,0,0,37,48,1,0,0,0,38,39,3,10,5,0,39,
-  	40,5,28,0,0,40,48,1,0,0,0,41,42,3,12,6,0,42,43,5,28,0,0,43,48,1,0,0,0,
-  	44,45,3,14,7,0,45,46,5,28,0,0,46,48,1,0,0,0,47,32,1,0,0,0,47,35,1,0,0,
-  	0,47,38,1,0,0,0,47,41,1,0,0,0,47,44,1,0,0,0,48,5,1,0,0,0,49,50,5,29,0,
-  	0,50,51,5,31,0,0,51,52,5,1,0,0,52,64,3,14,7,0,53,54,5,29,0,0,54,55,5,
-  	2,0,0,55,56,5,31,0,0,56,57,5,1,0,0,57,64,3,16,8,0,58,59,5,29,0,0,59,60,
-  	5,3,0,0,60,61,5,31,0,0,61,62,5,1,0,0,62,64,3,18,9,0,63,49,1,0,0,0,63,
-  	53,1,0,0,0,63,58,1,0,0,0,64,7,1,0,0,0,65,66,5,31,0,0,66,67,5,1,0,0,67,
-  	83,3,14,7,0,68,69,5,31,0,0,69,70,5,4,0,0,70,71,5,32,0,0,71,72,5,5,0,0,
-  	72,73,5,1,0,0,73,83,3,14,7,0,74,75,5,31,0,0,75,76,5,4,0,0,76,77,5,32,
-  	0,0,77,78,5,6,0,0,78,79,5,32,0,0,79,80,5,5,0,0,80,81,5,1,0,0,81,83,3,
-  	14,7,0,82,65,1,0,0,0,82,68,1,0,0,0,82,74,1,0,0,0,83,9,1,0,0,0,84,85,5,
-  	7,0,0,85,86,3,14,7,0,86,11,1,0,0,0,87,88,5,8,0,0,88,89,5,31,0,0,89,13,
-  	1,0,0,0,90,91,6,7,-1,0,91,92,5,22,0,0,92,113,3,14,7,9,93,113,5,32,0,0,
-  	94,113,5,33,0,0,95,113,5,30,0,0,96,113,5,34,0,0,97,113,5,31,0,0,98,99,
-  	5,23,0,0,99,100,3,14,7,0,100,101,5,24,0,0,101,113,1,0,0,0,102,103,5,31,
-  	0,0,103,104,5,4,0,0,104,105,5,32,0,0,105,113,5,5,0,0,106,107,5,31,0,0,
-  	107,108,5,4,0,0,108,109,5,32,0,0,109,110,5,6,0,0,110,111,5,32,0,0,111,
-  	113,5,5,0,0,112,90,1,0,0,0,112,93,1,0,0,0,112,94,1,0,0,0,112,95,1,0,0,
-  	0,112,96,1,0,0,0,112,97,1,0,0,0,112,98,1,0,0,0,112,102,1,0,0,0,112,106,
-  	1,0,0,0,113,128,1,0,0,0,114,115,10,13,0,0,115,116,7,0,0,0,116,127,3,14,
-  	7,14,117,118,10,12,0,0,118,119,7,1,0,0,119,127,3,14,7,13,120,121,10,11,
-  	0,0,121,122,7,2,0,0,122,127,3,14,7,12,123,124,10,10,0,0,124,125,7,3,0,
-  	0,125,127,3,14,7,11,126,114,1,0,0,0,126,117,1,0,0,0,126,120,1,0,0,0,126,
-  	123,1,0,0,0,127,130,1,0,0,0,128,126,1,0,0,0,128,129,1,0,0,0,129,15,1,
-  	0,0,0,130,128,1,0,0,0,131,132,5,4,0,0,132,137,3,14,7,0,133,134,5,25,0,
-  	0,134,136,3,14,7,0,135,133,1,0,0,0,136,139,1,0,0,0,137,135,1,0,0,0,137,
-  	138,1,0,0,0,138,140,1,0,0,0,139,137,1,0,0,0,140,141,5,5,0,0,141,17,1,
-  	0,0,0,142,143,5,4,0,0,143,148,3,16,8,0,144,145,5,25,0,0,145,147,3,16,
-  	8,0,146,144,1,0,0,0,147,150,1,0,0,0,148,146,1,0,0,0,148,149,1,0,0,0,149,
-  	151,1,0,0,0,150,148,1,0,0,0,151,152,5,5,0,0,152,19,1,0,0,0,9,27,47,63,
-  	82,112,126,128,137,148
+  	4,1,39,199,2,0,7,0,2,1,7,1,2,2,7,2,2,3,7,3,2,4,7,4,2,5,7,5,2,6,7,6,2,
+  	7,7,7,2,8,7,8,2,9,7,9,2,10,7,10,2,11,7,11,2,12,7,12,1,0,1,0,1,1,1,1,1,
+  	1,5,1,32,8,1,10,1,12,1,35,9,1,1,1,1,1,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,
+  	1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,1,2,3,2,60,8,2,1,3,1,
+  	3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,1,3,3,3,76,8,3,1,4,1,4,
+  	1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,1,4,3,4,95,8,
+  	4,1,5,1,5,1,5,1,6,1,6,1,6,1,7,1,7,1,7,1,7,5,7,107,8,7,10,7,12,7,110,9,
+  	7,1,7,3,7,113,8,7,1,7,1,7,1,8,1,8,1,8,5,8,120,8,8,10,8,12,8,123,9,8,1,
+  	9,1,9,1,9,1,9,5,9,129,8,9,10,9,12,9,132,9,9,1,9,1,9,1,10,1,10,1,10,1,
+  	10,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,10,1,
+  	10,1,10,1,10,1,10,1,10,3,10,158,8,10,1,10,1,10,1,10,1,10,1,10,1,10,1,
+  	10,1,10,1,10,1,10,1,10,1,10,5,10,172,8,10,10,10,12,10,175,9,10,1,11,1,
+  	11,1,11,1,11,5,11,181,8,11,10,11,12,11,184,9,11,1,11,1,11,1,12,1,12,1,
+  	12,1,12,5,12,192,8,12,10,12,12,12,195,9,12,1,12,1,12,1,12,0,1,20,13,0,
+  	2,4,6,8,10,12,14,16,18,20,22,24,0,4,1,0,13,14,1,0,15,16,1,0,17,22,1,0,
+  	23,25,214,0,26,1,0,0,0,2,28,1,0,0,0,4,59,1,0,0,0,6,75,1,0,0,0,8,94,1,
+  	0,0,0,10,96,1,0,0,0,12,99,1,0,0,0,14,102,1,0,0,0,16,116,1,0,0,0,18,124,
+  	1,0,0,0,20,157,1,0,0,0,22,176,1,0,0,0,24,187,1,0,0,0,26,27,3,2,1,0,27,
+  	1,1,0,0,0,28,29,5,30,0,0,29,33,5,32,0,0,30,32,3,4,2,0,31,30,1,0,0,0,32,
+  	35,1,0,0,0,33,31,1,0,0,0,33,34,1,0,0,0,34,36,1,0,0,0,35,33,1,0,0,0,36,
+  	37,5,31,0,0,37,3,1,0,0,0,38,39,3,6,3,0,39,40,5,32,0,0,40,60,1,0,0,0,41,
+  	42,3,8,4,0,42,43,5,32,0,0,43,60,1,0,0,0,44,45,3,10,5,0,45,46,5,32,0,0,
+  	46,60,1,0,0,0,47,48,3,12,6,0,48,49,5,32,0,0,49,60,1,0,0,0,50,51,3,20,
+  	10,0,51,52,5,32,0,0,52,60,1,0,0,0,53,54,3,14,7,0,54,55,5,32,0,0,55,60,
+  	1,0,0,0,56,57,3,18,9,0,57,58,5,32,0,0,58,60,1,0,0,0,59,38,1,0,0,0,59,
+  	41,1,0,0,0,59,44,1,0,0,0,59,47,1,0,0,0,59,50,1,0,0,0,59,53,1,0,0,0,59,
+  	56,1,0,0,0,60,5,1,0,0,0,61,62,5,33,0,0,62,63,5,35,0,0,63,64,5,1,0,0,64,
+  	76,3,20,10,0,65,66,5,33,0,0,66,67,5,2,0,0,67,68,5,35,0,0,68,69,5,1,0,
+  	0,69,76,3,22,11,0,70,71,5,33,0,0,71,72,5,3,0,0,72,73,5,35,0,0,73,74,5,
+  	1,0,0,74,76,3,24,12,0,75,61,1,0,0,0,75,65,1,0,0,0,75,70,1,0,0,0,76,7,
+  	1,0,0,0,77,78,5,35,0,0,78,79,5,1,0,0,79,95,3,20,10,0,80,81,5,35,0,0,81,
+  	82,5,4,0,0,82,83,5,36,0,0,83,84,5,5,0,0,84,85,5,1,0,0,85,95,3,20,10,0,
+  	86,87,5,35,0,0,87,88,5,4,0,0,88,89,5,36,0,0,89,90,5,6,0,0,90,91,5,36,
+  	0,0,91,92,5,5,0,0,92,93,5,1,0,0,93,95,3,20,10,0,94,77,1,0,0,0,94,80,1,
+  	0,0,0,94,86,1,0,0,0,95,9,1,0,0,0,96,97,5,7,0,0,97,98,3,20,10,0,98,11,
+  	1,0,0,0,99,100,5,8,0,0,100,101,5,35,0,0,101,13,1,0,0,0,102,103,5,9,0,
+  	0,103,104,3,20,10,0,104,108,5,32,0,0,105,107,3,4,2,0,106,105,1,0,0,0,
+  	107,110,1,0,0,0,108,106,1,0,0,0,108,109,1,0,0,0,109,112,1,0,0,0,110,108,
+  	1,0,0,0,111,113,3,16,8,0,112,111,1,0,0,0,112,113,1,0,0,0,113,114,1,0,
+  	0,0,114,115,5,10,0,0,115,15,1,0,0,0,116,117,5,11,0,0,117,121,5,32,0,0,
+  	118,120,3,4,2,0,119,118,1,0,0,0,120,123,1,0,0,0,121,119,1,0,0,0,121,122,
+  	1,0,0,0,122,17,1,0,0,0,123,121,1,0,0,0,124,125,5,12,0,0,125,126,3,20,
+  	10,0,126,130,5,32,0,0,127,129,3,4,2,0,128,127,1,0,0,0,129,132,1,0,0,0,
+  	130,128,1,0,0,0,130,131,1,0,0,0,131,133,1,0,0,0,132,130,1,0,0,0,133,134,
+  	5,10,0,0,134,19,1,0,0,0,135,136,6,10,-1,0,136,137,5,26,0,0,137,158,3,
+  	20,10,9,138,158,5,36,0,0,139,158,5,37,0,0,140,158,5,34,0,0,141,158,5,
+  	38,0,0,142,158,5,35,0,0,143,144,5,27,0,0,144,145,3,20,10,0,145,146,5,
+  	28,0,0,146,158,1,0,0,0,147,148,5,35,0,0,148,149,5,4,0,0,149,150,5,36,
+  	0,0,150,158,5,5,0,0,151,152,5,35,0,0,152,153,5,4,0,0,153,154,5,36,0,0,
+  	154,155,5,6,0,0,155,156,5,36,0,0,156,158,5,5,0,0,157,135,1,0,0,0,157,
+  	138,1,0,0,0,157,139,1,0,0,0,157,140,1,0,0,0,157,141,1,0,0,0,157,142,1,
+  	0,0,0,157,143,1,0,0,0,157,147,1,0,0,0,157,151,1,0,0,0,158,173,1,0,0,0,
+  	159,160,10,13,0,0,160,161,7,0,0,0,161,172,3,20,10,14,162,163,10,12,0,
+  	0,163,164,7,1,0,0,164,172,3,20,10,13,165,166,10,11,0,0,166,167,7,2,0,
+  	0,167,172,3,20,10,12,168,169,10,10,0,0,169,170,7,3,0,0,170,172,3,20,10,
+  	11,171,159,1,0,0,0,171,162,1,0,0,0,171,165,1,0,0,0,171,168,1,0,0,0,172,
+  	175,1,0,0,0,173,171,1,0,0,0,173,174,1,0,0,0,174,21,1,0,0,0,175,173,1,
+  	0,0,0,176,177,5,4,0,0,177,182,3,20,10,0,178,179,5,29,0,0,179,181,3,20,
+  	10,0,180,178,1,0,0,0,181,184,1,0,0,0,182,180,1,0,0,0,182,183,1,0,0,0,
+  	183,185,1,0,0,0,184,182,1,0,0,0,185,186,5,5,0,0,186,23,1,0,0,0,187,188,
+  	5,4,0,0,188,193,3,22,11,0,189,190,5,29,0,0,190,192,3,22,11,0,191,189,
+  	1,0,0,0,192,195,1,0,0,0,193,191,1,0,0,0,193,194,1,0,0,0,194,196,1,0,0,
+  	0,195,193,1,0,0,0,196,197,5,5,0,0,197,25,1,0,0,0,13,33,59,75,94,108,112,
+  	121,130,157,171,173,182,193
   };
   staticData->serializedATN = antlr4::atn::SerializedATNView(serializedATNSegment, sizeof(serializedATNSegment) / sizeof(serializedATNSegment[0]));
 
@@ -213,7 +230,7 @@ KiepskiLangParser::ProgramContext* KiepskiLangParser::program() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(20);
+    setState(26);
     start();
    
   }
@@ -291,22 +308,22 @@ KiepskiLangParser::StartContext* KiepskiLangParser::start() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(22);
+    setState(28);
     match(KiepskiLangParser::STARTPROG);
-    setState(23);
+    setState(29);
     match(KiepskiLangParser::NEWLINE);
-    setState(27);
+    setState(33);
     _errHandler->sync(this);
     _la = _input->LA(1);
     while ((((_la & ~ 0x3fULL) == 0) &&
-      ((1ULL << _la) & 33835450752) != 0)) {
-      setState(24);
+      ((1ULL << _la) & 541367210880) != 0)) {
+      setState(30);
       statement();
-      setState(29);
+      setState(35);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
-    setState(30);
+    setState(36);
     match(KiepskiLangParser::ENDPROG);
    
   }
@@ -349,6 +366,14 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::StatementContext::expr() {
   return getRuleContext<KiepskiLangParser::ExprContext>(0);
 }
 
+KiepskiLangParser::IfStatementContext* KiepskiLangParser::StatementContext::ifStatement() {
+  return getRuleContext<KiepskiLangParser::IfStatementContext>(0);
+}
+
+KiepskiLangParser::WhileStatementContext* KiepskiLangParser::StatementContext::whileStatement() {
+  return getRuleContext<KiepskiLangParser::WhileStatementContext>(0);
+}
+
 
 size_t KiepskiLangParser::StatementContext::getRuleIndex() const {
   return KiepskiLangParser::RuleStatement;
@@ -386,50 +411,68 @@ KiepskiLangParser::StatementContext* KiepskiLangParser::statement() {
     exitRule();
   });
   try {
-    setState(47);
+    setState(59);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 1, _ctx)) {
     case 1: {
       enterOuterAlt(_localctx, 1);
-      setState(32);
+      setState(38);
       varDecl();
-      setState(33);
+      setState(39);
       match(KiepskiLangParser::NEWLINE);
       break;
     }
 
     case 2: {
       enterOuterAlt(_localctx, 2);
-      setState(35);
+      setState(41);
       varAssign();
-      setState(36);
+      setState(42);
       match(KiepskiLangParser::NEWLINE);
       break;
     }
 
     case 3: {
       enterOuterAlt(_localctx, 3);
-      setState(38);
+      setState(44);
       print();
-      setState(39);
+      setState(45);
       match(KiepskiLangParser::NEWLINE);
       break;
     }
 
     case 4: {
       enterOuterAlt(_localctx, 4);
-      setState(41);
+      setState(47);
       read();
-      setState(42);
+      setState(48);
       match(KiepskiLangParser::NEWLINE);
       break;
     }
 
     case 5: {
       enterOuterAlt(_localctx, 5);
-      setState(44);
+      setState(50);
       expr(0);
-      setState(45);
+      setState(51);
+      match(KiepskiLangParser::NEWLINE);
+      break;
+    }
+
+    case 6: {
+      enterOuterAlt(_localctx, 6);
+      setState(53);
+      ifStatement();
+      setState(54);
+      match(KiepskiLangParser::NEWLINE);
+      break;
+    }
+
+    case 7: {
+      enterOuterAlt(_localctx, 7);
+      setState(56);
+      whileStatement();
+      setState(57);
       match(KiepskiLangParser::NEWLINE);
       break;
     }
@@ -574,19 +617,19 @@ KiepskiLangParser::VarDeclContext* KiepskiLangParser::varDecl() {
     exitRule();
   });
   try {
-    setState(63);
+    setState(75);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 2, _ctx)) {
     case 1: {
       _localctx = _tracker.createInstance<KiepskiLangParser::ScalarDeclContext>(_localctx);
       enterOuterAlt(_localctx, 1);
-      setState(49);
+      setState(61);
       match(KiepskiLangParser::TYPE);
-      setState(50);
+      setState(62);
       match(KiepskiLangParser::ID);
-      setState(51);
+      setState(63);
       match(KiepskiLangParser::T__0);
-      setState(52);
+      setState(64);
       expr(0);
       break;
     }
@@ -594,15 +637,15 @@ KiepskiLangParser::VarDeclContext* KiepskiLangParser::varDecl() {
     case 2: {
       _localctx = _tracker.createInstance<KiepskiLangParser::ArrayDeclContext>(_localctx);
       enterOuterAlt(_localctx, 2);
-      setState(53);
+      setState(65);
       match(KiepskiLangParser::TYPE);
-      setState(54);
+      setState(66);
       match(KiepskiLangParser::T__1);
-      setState(55);
+      setState(67);
       match(KiepskiLangParser::ID);
-      setState(56);
+      setState(68);
       match(KiepskiLangParser::T__0);
-      setState(57);
+      setState(69);
       arrayInit();
       break;
     }
@@ -610,15 +653,15 @@ KiepskiLangParser::VarDeclContext* KiepskiLangParser::varDecl() {
     case 3: {
       _localctx = _tracker.createInstance<KiepskiLangParser::MatrixDeclContext>(_localctx);
       enterOuterAlt(_localctx, 3);
-      setState(58);
+      setState(70);
       match(KiepskiLangParser::TYPE);
-      setState(59);
+      setState(71);
       match(KiepskiLangParser::T__2);
-      setState(60);
+      setState(72);
       match(KiepskiLangParser::ID);
-      setState(61);
+      setState(73);
       match(KiepskiLangParser::T__0);
-      setState(62);
+      setState(74);
       matrixInit();
       break;
     }
@@ -763,17 +806,17 @@ KiepskiLangParser::VarAssignContext* KiepskiLangParser::varAssign() {
     exitRule();
   });
   try {
-    setState(82);
+    setState(94);
     _errHandler->sync(this);
     switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 3, _ctx)) {
     case 1: {
       _localctx = _tracker.createInstance<KiepskiLangParser::VariableAssignContext>(_localctx);
       enterOuterAlt(_localctx, 1);
-      setState(65);
+      setState(77);
       match(KiepskiLangParser::ID);
-      setState(66);
+      setState(78);
       match(KiepskiLangParser::T__0);
-      setState(67);
+      setState(79);
       expr(0);
       break;
     }
@@ -781,17 +824,17 @@ KiepskiLangParser::VarAssignContext* KiepskiLangParser::varAssign() {
     case 2: {
       _localctx = _tracker.createInstance<KiepskiLangParser::ArrayAssignContext>(_localctx);
       enterOuterAlt(_localctx, 2);
-      setState(68);
+      setState(80);
       match(KiepskiLangParser::ID);
-      setState(69);
+      setState(81);
       match(KiepskiLangParser::T__3);
-      setState(70);
+      setState(82);
       match(KiepskiLangParser::INT);
-      setState(71);
+      setState(83);
       match(KiepskiLangParser::T__4);
-      setState(72);
+      setState(84);
       match(KiepskiLangParser::T__0);
-      setState(73);
+      setState(85);
       expr(0);
       break;
     }
@@ -799,21 +842,21 @@ KiepskiLangParser::VarAssignContext* KiepskiLangParser::varAssign() {
     case 3: {
       _localctx = _tracker.createInstance<KiepskiLangParser::MatrixAssignContext>(_localctx);
       enterOuterAlt(_localctx, 3);
-      setState(74);
+      setState(86);
       match(KiepskiLangParser::ID);
-      setState(75);
+      setState(87);
       match(KiepskiLangParser::T__3);
-      setState(76);
+      setState(88);
       match(KiepskiLangParser::INT);
-      setState(77);
+      setState(89);
       match(KiepskiLangParser::T__5);
-      setState(78);
+      setState(90);
       match(KiepskiLangParser::INT);
-      setState(79);
+      setState(91);
       match(KiepskiLangParser::T__4);
-      setState(80);
+      setState(92);
       match(KiepskiLangParser::T__0);
-      setState(81);
+      setState(93);
       expr(0);
       break;
     }
@@ -880,9 +923,9 @@ KiepskiLangParser::PrintContext* KiepskiLangParser::print() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(84);
+    setState(96);
     match(KiepskiLangParser::T__6);
-    setState(85);
+    setState(97);
     expr(0);
    
   }
@@ -943,10 +986,287 @@ KiepskiLangParser::ReadContext* KiepskiLangParser::read() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(87);
+    setState(99);
     match(KiepskiLangParser::T__7);
-    setState(88);
+    setState(100);
     match(KiepskiLangParser::ID);
+   
+  }
+  catch (RecognitionException &e) {
+    _errHandler->reportError(this, e);
+    _localctx->exception = std::current_exception();
+    _errHandler->recover(this, _localctx->exception);
+  }
+
+  return _localctx;
+}
+
+//----------------- IfStatementContext ------------------------------------------------------------------
+
+KiepskiLangParser::IfStatementContext::IfStatementContext(ParserRuleContext *parent, size_t invokingState)
+  : ParserRuleContext(parent, invokingState) {
+}
+
+KiepskiLangParser::ExprContext* KiepskiLangParser::IfStatementContext::expr() {
+  return getRuleContext<KiepskiLangParser::ExprContext>(0);
+}
+
+tree::TerminalNode* KiepskiLangParser::IfStatementContext::NEWLINE() {
+  return getToken(KiepskiLangParser::NEWLINE, 0);
+}
+
+std::vector<KiepskiLangParser::StatementContext *> KiepskiLangParser::IfStatementContext::statement() {
+  return getRuleContexts<KiepskiLangParser::StatementContext>();
+}
+
+KiepskiLangParser::StatementContext* KiepskiLangParser::IfStatementContext::statement(size_t i) {
+  return getRuleContext<KiepskiLangParser::StatementContext>(i);
+}
+
+KiepskiLangParser::ElseBlockContext* KiepskiLangParser::IfStatementContext::elseBlock() {
+  return getRuleContext<KiepskiLangParser::ElseBlockContext>(0);
+}
+
+
+size_t KiepskiLangParser::IfStatementContext::getRuleIndex() const {
+  return KiepskiLangParser::RuleIfStatement;
+}
+
+void KiepskiLangParser::IfStatementContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<KiepskiLangListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterIfStatement(this);
+}
+
+void KiepskiLangParser::IfStatementContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<KiepskiLangListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitIfStatement(this);
+}
+
+
+std::any KiepskiLangParser::IfStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<KiepskiLangVisitor*>(visitor))
+    return parserVisitor->visitIfStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
+KiepskiLangParser::IfStatementContext* KiepskiLangParser::ifStatement() {
+  IfStatementContext *_localctx = _tracker.createInstance<IfStatementContext>(_ctx, getState());
+  enterRule(_localctx, 14, KiepskiLangParser::RuleIfStatement);
+  size_t _la = 0;
+
+#if __cplusplus > 201703L
+  auto onExit = finally([=, this] {
+#else
+  auto onExit = finally([=] {
+#endif
+    exitRule();
+  });
+  try {
+    enterOuterAlt(_localctx, 1);
+    setState(102);
+    match(KiepskiLangParser::T__8);
+    setState(103);
+    expr(0);
+    setState(104);
+    match(KiepskiLangParser::NEWLINE);
+    setState(108);
+    _errHandler->sync(this);
+    _la = _input->LA(1);
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 541367210880) != 0)) {
+      setState(105);
+      statement();
+      setState(110);
+      _errHandler->sync(this);
+      _la = _input->LA(1);
+    }
+    setState(112);
+    _errHandler->sync(this);
+
+    _la = _input->LA(1);
+    if (_la == KiepskiLangParser::T__10) {
+      setState(111);
+      elseBlock();
+    }
+    setState(114);
+    match(KiepskiLangParser::T__9);
+   
+  }
+  catch (RecognitionException &e) {
+    _errHandler->reportError(this, e);
+    _localctx->exception = std::current_exception();
+    _errHandler->recover(this, _localctx->exception);
+  }
+
+  return _localctx;
+}
+
+//----------------- ElseBlockContext ------------------------------------------------------------------
+
+KiepskiLangParser::ElseBlockContext::ElseBlockContext(ParserRuleContext *parent, size_t invokingState)
+  : ParserRuleContext(parent, invokingState) {
+}
+
+tree::TerminalNode* KiepskiLangParser::ElseBlockContext::NEWLINE() {
+  return getToken(KiepskiLangParser::NEWLINE, 0);
+}
+
+std::vector<KiepskiLangParser::StatementContext *> KiepskiLangParser::ElseBlockContext::statement() {
+  return getRuleContexts<KiepskiLangParser::StatementContext>();
+}
+
+KiepskiLangParser::StatementContext* KiepskiLangParser::ElseBlockContext::statement(size_t i) {
+  return getRuleContext<KiepskiLangParser::StatementContext>(i);
+}
+
+
+size_t KiepskiLangParser::ElseBlockContext::getRuleIndex() const {
+  return KiepskiLangParser::RuleElseBlock;
+}
+
+void KiepskiLangParser::ElseBlockContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<KiepskiLangListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterElseBlock(this);
+}
+
+void KiepskiLangParser::ElseBlockContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<KiepskiLangListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitElseBlock(this);
+}
+
+
+std::any KiepskiLangParser::ElseBlockContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<KiepskiLangVisitor*>(visitor))
+    return parserVisitor->visitElseBlock(this);
+  else
+    return visitor->visitChildren(this);
+}
+
+KiepskiLangParser::ElseBlockContext* KiepskiLangParser::elseBlock() {
+  ElseBlockContext *_localctx = _tracker.createInstance<ElseBlockContext>(_ctx, getState());
+  enterRule(_localctx, 16, KiepskiLangParser::RuleElseBlock);
+  size_t _la = 0;
+
+#if __cplusplus > 201703L
+  auto onExit = finally([=, this] {
+#else
+  auto onExit = finally([=] {
+#endif
+    exitRule();
+  });
+  try {
+    enterOuterAlt(_localctx, 1);
+    setState(116);
+    match(KiepskiLangParser::T__10);
+    setState(117);
+    match(KiepskiLangParser::NEWLINE);
+    setState(121);
+    _errHandler->sync(this);
+    _la = _input->LA(1);
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 541367210880) != 0)) {
+      setState(118);
+      statement();
+      setState(123);
+      _errHandler->sync(this);
+      _la = _input->LA(1);
+    }
+   
+  }
+  catch (RecognitionException &e) {
+    _errHandler->reportError(this, e);
+    _localctx->exception = std::current_exception();
+    _errHandler->recover(this, _localctx->exception);
+  }
+
+  return _localctx;
+}
+
+//----------------- WhileStatementContext ------------------------------------------------------------------
+
+KiepskiLangParser::WhileStatementContext::WhileStatementContext(ParserRuleContext *parent, size_t invokingState)
+  : ParserRuleContext(parent, invokingState) {
+}
+
+KiepskiLangParser::ExprContext* KiepskiLangParser::WhileStatementContext::expr() {
+  return getRuleContext<KiepskiLangParser::ExprContext>(0);
+}
+
+tree::TerminalNode* KiepskiLangParser::WhileStatementContext::NEWLINE() {
+  return getToken(KiepskiLangParser::NEWLINE, 0);
+}
+
+std::vector<KiepskiLangParser::StatementContext *> KiepskiLangParser::WhileStatementContext::statement() {
+  return getRuleContexts<KiepskiLangParser::StatementContext>();
+}
+
+KiepskiLangParser::StatementContext* KiepskiLangParser::WhileStatementContext::statement(size_t i) {
+  return getRuleContext<KiepskiLangParser::StatementContext>(i);
+}
+
+
+size_t KiepskiLangParser::WhileStatementContext::getRuleIndex() const {
+  return KiepskiLangParser::RuleWhileStatement;
+}
+
+void KiepskiLangParser::WhileStatementContext::enterRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<KiepskiLangListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->enterWhileStatement(this);
+}
+
+void KiepskiLangParser::WhileStatementContext::exitRule(tree::ParseTreeListener *listener) {
+  auto parserListener = dynamic_cast<KiepskiLangListener *>(listener);
+  if (parserListener != nullptr)
+    parserListener->exitWhileStatement(this);
+}
+
+
+std::any KiepskiLangParser::WhileStatementContext::accept(tree::ParseTreeVisitor *visitor) {
+  if (auto parserVisitor = dynamic_cast<KiepskiLangVisitor*>(visitor))
+    return parserVisitor->visitWhileStatement(this);
+  else
+    return visitor->visitChildren(this);
+}
+
+KiepskiLangParser::WhileStatementContext* KiepskiLangParser::whileStatement() {
+  WhileStatementContext *_localctx = _tracker.createInstance<WhileStatementContext>(_ctx, getState());
+  enterRule(_localctx, 18, KiepskiLangParser::RuleWhileStatement);
+  size_t _la = 0;
+
+#if __cplusplus > 201703L
+  auto onExit = finally([=, this] {
+#else
+  auto onExit = finally([=] {
+#endif
+    exitRule();
+  });
+  try {
+    enterOuterAlt(_localctx, 1);
+    setState(124);
+    match(KiepskiLangParser::T__11);
+    setState(125);
+    expr(0);
+    setState(126);
+    match(KiepskiLangParser::NEWLINE);
+    setState(130);
+    _errHandler->sync(this);
+    _la = _input->LA(1);
+    while ((((_la & ~ 0x3fULL) == 0) &&
+      ((1ULL << _la) & 541367210880) != 0)) {
+      setState(127);
+      statement();
+      setState(132);
+      _errHandler->sync(this);
+      _la = _input->LA(1);
+    }
+    setState(133);
+    match(KiepskiLangParser::T__9);
    
   }
   catch (RecognitionException &e) {
@@ -1337,8 +1657,8 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
   KiepskiLangParser::ExprContext *_localctx = _tracker.createInstance<ExprContext>(_ctx, parentState);
   KiepskiLangParser::ExprContext *previousContext = _localctx;
   (void)previousContext; // Silence compiler, in case the context is not used by generated code.
-  size_t startState = 14;
-  enterRecursionRule(_localctx, 14, KiepskiLangParser::RuleExpr, precedence);
+  size_t startState = 20;
+  enterRecursionRule(_localctx, 20, KiepskiLangParser::RuleExpr, precedence);
 
     size_t _la = 0;
 
@@ -1352,17 +1672,17 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
   try {
     size_t alt;
     enterOuterAlt(_localctx, 1);
-    setState(112);
+    setState(157);
     _errHandler->sync(this);
-    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 4, _ctx)) {
+    switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 8, _ctx)) {
     case 1: {
       _localctx = _tracker.createInstance<LogicNegExprContext>(_localctx);
       _ctx = _localctx;
       previousContext = _localctx;
 
-      setState(91);
-      match(KiepskiLangParser::T__21);
-      setState(92);
+      setState(136);
+      match(KiepskiLangParser::T__25);
+      setState(137);
       expr(9);
       break;
     }
@@ -1371,7 +1691,7 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
       _localctx = _tracker.createInstance<IntLiteralContext>(_localctx);
       _ctx = _localctx;
       previousContext = _localctx;
-      setState(93);
+      setState(138);
       match(KiepskiLangParser::INT);
       break;
     }
@@ -1380,7 +1700,7 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
       _localctx = _tracker.createInstance<FloatLiteralContext>(_localctx);
       _ctx = _localctx;
       previousContext = _localctx;
-      setState(94);
+      setState(139);
       match(KiepskiLangParser::FLOAT);
       break;
     }
@@ -1389,7 +1709,7 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
       _localctx = _tracker.createInstance<BoolLiteralContext>(_localctx);
       _ctx = _localctx;
       previousContext = _localctx;
-      setState(95);
+      setState(140);
       match(KiepskiLangParser::BOOL);
       break;
     }
@@ -1398,7 +1718,7 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
       _localctx = _tracker.createInstance<StringLiteralContext>(_localctx);
       _ctx = _localctx;
       previousContext = _localctx;
-      setState(96);
+      setState(141);
       match(KiepskiLangParser::STRING);
       break;
     }
@@ -1407,7 +1727,7 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
       _localctx = _tracker.createInstance<VarReferenceContext>(_localctx);
       _ctx = _localctx;
       previousContext = _localctx;
-      setState(97);
+      setState(142);
       match(KiepskiLangParser::ID);
       break;
     }
@@ -1416,12 +1736,12 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
       _localctx = _tracker.createInstance<BracesContext>(_localctx);
       _ctx = _localctx;
       previousContext = _localctx;
-      setState(98);
-      match(KiepskiLangParser::T__22);
-      setState(99);
+      setState(143);
+      match(KiepskiLangParser::T__26);
+      setState(144);
       expr(0);
-      setState(100);
-      match(KiepskiLangParser::T__23);
+      setState(145);
+      match(KiepskiLangParser::T__27);
       break;
     }
 
@@ -1429,13 +1749,13 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
       _localctx = _tracker.createInstance<ArrayAccessExprContext>(_localctx);
       _ctx = _localctx;
       previousContext = _localctx;
-      setState(102);
+      setState(147);
       match(KiepskiLangParser::ID);
-      setState(103);
+      setState(148);
       match(KiepskiLangParser::T__3);
-      setState(104);
+      setState(149);
       match(KiepskiLangParser::INT);
-      setState(105);
+      setState(150);
       match(KiepskiLangParser::T__4);
       break;
     }
@@ -1444,17 +1764,17 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
       _localctx = _tracker.createInstance<MatrixAccessExprContext>(_localctx);
       _ctx = _localctx;
       previousContext = _localctx;
-      setState(106);
+      setState(151);
       match(KiepskiLangParser::ID);
-      setState(107);
+      setState(152);
       match(KiepskiLangParser::T__3);
-      setState(108);
+      setState(153);
       match(KiepskiLangParser::INT);
-      setState(109);
+      setState(154);
       match(KiepskiLangParser::T__5);
-      setState(110);
+      setState(155);
       match(KiepskiLangParser::INT);
-      setState(111);
+      setState(156);
       match(KiepskiLangParser::T__4);
       break;
     }
@@ -1463,36 +1783,36 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
       break;
     }
     _ctx->stop = _input->LT(-1);
-    setState(128);
+    setState(173);
     _errHandler->sync(this);
-    alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 6, _ctx);
+    alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 10, _ctx);
     while (alt != 2 && alt != atn::ATN::INVALID_ALT_NUMBER) {
       if (alt == 1) {
         if (!_parseListeners.empty())
           triggerExitRuleEvent();
         previousContext = _localctx;
-        setState(126);
+        setState(171);
         _errHandler->sync(this);
-        switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 5, _ctx)) {
+        switch (getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 9, _ctx)) {
         case 1: {
           auto newContext = _tracker.createInstance<MulExprContext>(_tracker.createInstance<ExprContext>(parentContext, parentState));
           _localctx = newContext;
           pushNewRecursionContext(newContext, startState, RuleExpr);
-          setState(114);
+          setState(159);
 
           if (!(precpred(_ctx, 13))) throw FailedPredicateException(this, "precpred(_ctx, 13)");
-          setState(115);
+          setState(160);
           _la = _input->LA(1);
-          if (!(_la == KiepskiLangParser::T__8
+          if (!(_la == KiepskiLangParser::T__12
 
-          || _la == KiepskiLangParser::T__9)) {
+          || _la == KiepskiLangParser::T__13)) {
           _errHandler->recoverInline(this);
           }
           else {
             _errHandler->reportMatch(this);
             consume();
           }
-          setState(116);
+          setState(161);
           expr(14);
           break;
         }
@@ -1501,21 +1821,21 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
           auto newContext = _tracker.createInstance<AddExprContext>(_tracker.createInstance<ExprContext>(parentContext, parentState));
           _localctx = newContext;
           pushNewRecursionContext(newContext, startState, RuleExpr);
-          setState(117);
+          setState(162);
 
           if (!(precpred(_ctx, 12))) throw FailedPredicateException(this, "precpred(_ctx, 12)");
-          setState(118);
+          setState(163);
           _la = _input->LA(1);
-          if (!(_la == KiepskiLangParser::T__10
+          if (!(_la == KiepskiLangParser::T__14
 
-          || _la == KiepskiLangParser::T__11)) {
+          || _la == KiepskiLangParser::T__15)) {
           _errHandler->recoverInline(this);
           }
           else {
             _errHandler->reportMatch(this);
             consume();
           }
-          setState(119);
+          setState(164);
           expr(13);
           break;
         }
@@ -1524,20 +1844,20 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
           auto newContext = _tracker.createInstance<ComparisonExprContext>(_tracker.createInstance<ExprContext>(parentContext, parentState));
           _localctx = newContext;
           pushNewRecursionContext(newContext, startState, RuleExpr);
-          setState(120);
+          setState(165);
 
           if (!(precpred(_ctx, 11))) throw FailedPredicateException(this, "precpred(_ctx, 11)");
-          setState(121);
+          setState(166);
           _la = _input->LA(1);
           if (!((((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 516096) != 0))) {
+            ((1ULL << _la) & 8257536) != 0))) {
           _errHandler->recoverInline(this);
           }
           else {
             _errHandler->reportMatch(this);
             consume();
           }
-          setState(122);
+          setState(167);
           expr(12);
           break;
         }
@@ -1546,20 +1866,20 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
           auto newContext = _tracker.createInstance<LogicBinaryExprContext>(_tracker.createInstance<ExprContext>(parentContext, parentState));
           _localctx = newContext;
           pushNewRecursionContext(newContext, startState, RuleExpr);
-          setState(123);
+          setState(168);
 
           if (!(precpred(_ctx, 10))) throw FailedPredicateException(this, "precpred(_ctx, 10)");
-          setState(124);
+          setState(169);
           _la = _input->LA(1);
           if (!((((_la & ~ 0x3fULL) == 0) &&
-            ((1ULL << _la) & 3670016) != 0))) {
+            ((1ULL << _la) & 58720256) != 0))) {
           _errHandler->recoverInline(this);
           }
           else {
             _errHandler->reportMatch(this);
             consume();
           }
-          setState(125);
+          setState(170);
           expr(11);
           break;
         }
@@ -1568,9 +1888,9 @@ KiepskiLangParser::ExprContext* KiepskiLangParser::expr(int precedence) {
           break;
         } 
       }
-      setState(130);
+      setState(175);
       _errHandler->sync(this);
-      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 6, _ctx);
+      alt = getInterpreter<atn::ParserATNSimulator>()->adaptivePredict(_input, 10, _ctx);
     }
   }
   catch (RecognitionException &e) {
@@ -1622,7 +1942,7 @@ std::any KiepskiLangParser::ArrayInitContext::accept(tree::ParseTreeVisitor *vis
 
 KiepskiLangParser::ArrayInitContext* KiepskiLangParser::arrayInit() {
   ArrayInitContext *_localctx = _tracker.createInstance<ArrayInitContext>(_ctx, getState());
-  enterRule(_localctx, 16, KiepskiLangParser::RuleArrayInit);
+  enterRule(_localctx, 22, KiepskiLangParser::RuleArrayInit);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1634,23 +1954,23 @@ KiepskiLangParser::ArrayInitContext* KiepskiLangParser::arrayInit() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(131);
+    setState(176);
     match(KiepskiLangParser::T__3);
-    setState(132);
+    setState(177);
     expr(0);
-    setState(137);
+    setState(182);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (_la == KiepskiLangParser::T__24) {
-      setState(133);
-      match(KiepskiLangParser::T__24);
-      setState(134);
+    while (_la == KiepskiLangParser::T__28) {
+      setState(178);
+      match(KiepskiLangParser::T__28);
+      setState(179);
       expr(0);
-      setState(139);
+      setState(184);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
-    setState(140);
+    setState(185);
     match(KiepskiLangParser::T__4);
    
   }
@@ -1704,7 +2024,7 @@ std::any KiepskiLangParser::MatrixInitContext::accept(tree::ParseTreeVisitor *vi
 
 KiepskiLangParser::MatrixInitContext* KiepskiLangParser::matrixInit() {
   MatrixInitContext *_localctx = _tracker.createInstance<MatrixInitContext>(_ctx, getState());
-  enterRule(_localctx, 18, KiepskiLangParser::RuleMatrixInit);
+  enterRule(_localctx, 24, KiepskiLangParser::RuleMatrixInit);
   size_t _la = 0;
 
 #if __cplusplus > 201703L
@@ -1716,23 +2036,23 @@ KiepskiLangParser::MatrixInitContext* KiepskiLangParser::matrixInit() {
   });
   try {
     enterOuterAlt(_localctx, 1);
-    setState(142);
+    setState(187);
     match(KiepskiLangParser::T__3);
-    setState(143);
+    setState(188);
     arrayInit();
-    setState(148);
+    setState(193);
     _errHandler->sync(this);
     _la = _input->LA(1);
-    while (_la == KiepskiLangParser::T__24) {
-      setState(144);
-      match(KiepskiLangParser::T__24);
-      setState(145);
+    while (_la == KiepskiLangParser::T__28) {
+      setState(189);
+      match(KiepskiLangParser::T__28);
+      setState(190);
       arrayInit();
-      setState(150);
+      setState(195);
       _errHandler->sync(this);
       _la = _input->LA(1);
     }
-    setState(151);
+    setState(196);
     match(KiepskiLangParser::T__4);
    
   }
@@ -1747,7 +2067,7 @@ KiepskiLangParser::MatrixInitContext* KiepskiLangParser::matrixInit() {
 
 bool KiepskiLangParser::sempred(RuleContext *context, size_t ruleIndex, size_t predicateIndex) {
   switch (ruleIndex) {
-    case 7: return exprSempred(antlrcpp::downCast<ExprContext *>(context), predicateIndex);
+    case 10: return exprSempred(antlrcpp::downCast<ExprContext *>(context), predicateIndex);
 
   default:
     break;
