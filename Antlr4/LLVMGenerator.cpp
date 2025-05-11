@@ -14,6 +14,14 @@ std::unique_ptr<IRBuilder<>> LLVMGenerator::builder = std::make_unique<IRBuilder
 
 std::map<std::string, std::pair<Value*, std::string>> LLVMGenerator::namedValues;
 
+std::map<std::string, std::pair<Value*, std::string>> LLVMGenerator::globalValues;
+
+std::map<std::string, std::vector<std::pair<std::string, std::string>>> LLVMGenerator::structs;
+
+std::map<std::string, std::vector<std::pair<std::string, std::string>>> LLVMGenerator::declaredMethods;
+
+std::vector<std::string> LLVMGenerator::currentClass;
+
 std::map<std::string, int> LLVMGenerator::arraySizes;
 
 std::map<std::string, std::pair<int, int>> LLVMGenerator::matrixSizes;
@@ -24,7 +32,298 @@ Value* LLVMGenerator::logErrorV(std::string str) {
 }
 
 std::any LLVMGenerator::visitProgram(KiepskiLangParser::ProgramContext* ctx) {
+    auto globalVars = ctx->globalVarDecl();
+    for (auto var : globalVars) {
+        visitGlobalVarDecl(var);
+    }
+    auto declStructs = ctx->structDecl();
+    for (auto declStruct : declStructs) {
+        visitStructDecl(declStruct);
+    }
+    auto declClasses = ctx->classDecl();
+    for (auto declClass : declClasses) {
+        visitClassDecl(declClass);
+    }
+    auto functions = ctx->functionDecl();
+    for (auto function : functions) {
+        visitFunctionDecl(function);
+    }
 	return visitStart(ctx->start());
+}
+
+std::any LLVMGenerator::visitFunctionDecl(KiepskiLangParser::FunctionDeclContext* ctx) {
+    //TODO dodac sprawdzanie typow zwracanych wartosci zeby sie zgadzaly
+    std::string functionName = ctx->ID()->getText();
+    std::string returnedTypeStr = ctx->TYPE()->getText();
+
+    Type* returnedType = nullptr;
+    if (returnedTypeStr == "int") {
+        returnedType = Type::getInt32Ty(*theContext);
+    }
+    else if (returnedTypeStr == "long") {
+        returnedType = Type::getInt64Ty(*theContext);
+    }
+    else if (returnedTypeStr == "float") {
+        returnedType = Type::getFloatTy(*theContext);
+    }
+    else if (returnedTypeStr == "double") {
+        returnedType = Type::getDoubleTy(*theContext);
+    }
+    else if (returnedTypeStr == "bool") {
+        returnedType = Type::getInt1Ty(*theContext);
+    }
+    else if (returnedTypeStr == "void") {
+        returnedType = Type::getVoidTy(*theContext);
+    }
+
+    std::vector<Type*> argTypes;
+    std::vector<std::pair<std::string, std::string>> argNames;
+
+    if (ctx->paramList()) {
+        auto paramCtx = ctx->paramList();
+        for (int i = 0; i < paramCtx->TYPE().size(); i++) {
+            std::string typeStr = paramCtx->TYPE(i)->getText();
+            std::string argName = paramCtx->ID(i)->getText();
+            argNames.push_back(std::make_pair(argName, typeStr));
+
+            if (typeStr == "int") {
+                argTypes.push_back(Type::getInt32Ty(*theContext));
+            }
+            else if (typeStr == "long") {
+                argTypes.push_back(Type::getInt64Ty(*theContext));
+            }
+            else if (typeStr == "float") {
+                argTypes.push_back(Type::getFloatTy(*theContext));
+            }
+            else if (typeStr == "double") {
+                argTypes.push_back(Type::getDoubleTy(*theContext));
+            }
+            else if (typeStr == "bool") {
+                argTypes.push_back(Type::getInt1Ty(*theContext));
+            }
+        }
+    }
+
+    FunctionType* FT = FunctionType::get(returnedType, argTypes, false);
+    Function* function = Function::Create(FT, Function::ExternalLinkage, functionName, *theModule);
+
+    BasicBlock* BB = BasicBlock::Create(*theContext, "entry", function);
+    builder->SetInsertPoint(BB);
+
+    int idx = 0;
+    for (auto& arg : function->args()) {
+        arg.setName(argNames[idx].first);
+
+        AllocaInst* allocaVar = builder->CreateAlloca(arg.getType(), nullptr, arg.getName());
+        builder->CreateStore(&arg, allocaVar);
+        namedValues.insert_or_assign(argNames[idx].first, std::make_pair(allocaVar, argNames[idx].second));
+        idx++;
+    }
+
+    for (auto statement : ctx->statement()) {
+        visitStatement(statement);
+    }
+
+    if (ctx->returnStatement()) {
+        if (returnedType == Type::getVoidTy(*theContext)) {
+            return logErrorV("Funkcja typu void nie moze nic zwrocic");
+        }
+        Value* returnValue = std::any_cast<Value*>(visitReturnStatement(ctx->returnStatement()));
+        builder->CreateRet(returnValue);
+    }
+    if (returnedType == Type::getVoidTy(*theContext)) {
+        builder->CreateRetVoid();
+    }
+    namedValues.clear();
+    return nullptr;
+}
+
+std::any LLVMGenerator::visitParamList(KiepskiLangParser::ParamListContext* ctx) {
+    return nullptr;
+}
+
+std::any LLVMGenerator::visitReturnStatement(KiepskiLangParser::ReturnStatementContext* ctx) {
+    return visitExpr(ctx->expr());
+}
+
+std::any LLVMGenerator::visitGlobalVarDecl(KiepskiLangParser::GlobalVarDeclContext* ctx) {
+    Value* evaluatedExpr = std::any_cast<Value*>(visitExpr(ctx->expr()));
+    if (!evaluatedExpr) {
+        return logErrorV("Blad przy deklaracji zmiennej globalnej " + ctx->ID()->getText());
+    }
+    globalValues.insert_or_assign(ctx->ID()->getText(), std::make_pair(evaluatedExpr, ctx->TYPE()->getText()));
+    return nullptr;
+}
+
+std::any LLVMGenerator::visitStructDecl(KiepskiLangParser::StructDeclContext* ctx) {
+    std::string structName = ctx->ID()->getText();
+    StructType* structTy = StructType::getTypeByName(*theContext, structName);
+    if (!structTy) {
+        auto structVars = ctx->varInit();
+        std::vector<std::pair<std::string, std::string>> structVarsNames;
+        std::vector<Type*> elements;
+        for (auto structVar : structVars) {
+            structVarsNames.push_back(std::make_pair(structVar->ID()->getText(), "PUBLIC"));
+            elements.push_back(std::any_cast<Type*>(visitVarInit(structVar)));
+        }
+        structTy = StructType::create(*theContext, elements, structName);
+        structs.insert_or_assign(structName, structVarsNames);
+    }
+    return nullptr;
+}
+
+std::any LLVMGenerator::visitClassDecl(KiepskiLangParser::ClassDeclContext* ctx) {
+    std::string className = ctx->ID()->getText();
+    StructType* classTy = StructType::getTypeByName(*theContext, className);
+    if (!classTy) {
+        auto classVars = ctx->classMember();
+        std::vector<std::pair<std::string, std::string>> classVarsNames;
+        std::vector<std::pair<std::string, std::string>> methods;
+        std::vector<Type*> elements;
+        for (auto classVar : classVars) {
+            if (dynamic_cast<KiepskiLangParser::ClassFieldContext*>(classVar)) {
+                auto classField = dynamic_cast<KiepskiLangParser::ClassFieldContext*>(classVar);
+                classVarsNames.push_back(std::make_pair(classField->varInit()->ID()->getText(), classField->ACCESSMOD()->getText()));
+                elements.push_back(std::any_cast<Type*>(visitVarInit(classField->varInit())));
+            }
+        }
+        classTy = StructType::create(*theContext, elements, className);
+        structs.insert_or_assign(className, classVarsNames);
+        currentClass.push_back(className);
+        for (auto classVar : classVars) {
+            if (dynamic_cast<KiepskiLangParser::ClassMethodContext*>(classVar)) {
+                auto classMethod = dynamic_cast<KiepskiLangParser::ClassMethodContext*>(classVar);
+                methods.push_back(std::make_pair(classMethod->functionDecl()->ID()->getText(), classMethod->ACCESSMOD()->getText()));
+                visitClassMethod(classMethod);
+            }
+        }
+        currentClass.clear();
+        declaredMethods.insert_or_assign(className, methods);
+    }
+    return nullptr;
+}
+
+std::any LLVMGenerator::visitClassField(KiepskiLangParser::ClassFieldContext* ctx) {
+    return nullptr;
+}
+
+std::any LLVMGenerator::visitClassMethod(KiepskiLangParser::ClassMethodContext* ctx) {
+    std::string className = currentClass.back();
+    std::string functionName = ctx->functionDecl()->ID()->getText();
+    std::string returnedTypeStr = ctx->functionDecl()->TYPE()->getText();
+
+    Type* returnedType = nullptr;
+    if (returnedTypeStr == "int") {
+        returnedType = Type::getInt32Ty(*theContext);
+    }
+    else if (returnedTypeStr == "long") {
+        returnedType = Type::getInt64Ty(*theContext);
+    }
+    else if (returnedTypeStr == "float") {
+        returnedType = Type::getFloatTy(*theContext);
+    }
+    else if (returnedTypeStr == "double") {
+        returnedType = Type::getDoubleTy(*theContext);
+    }
+    else if (returnedTypeStr == "bool") {
+        returnedType = Type::getInt1Ty(*theContext);
+    }
+    else if (returnedTypeStr == "void") {
+        returnedType = Type::getVoidTy(*theContext);
+    }
+
+    std::vector<Type*> argTypes;
+    StructType* classTy = StructType::getTypeByName(*theContext, className);
+    Type* classPtrTy = PointerType::getUnqual(classTy);
+    argTypes.push_back(classPtrTy);
+    std::vector<std::pair<std::string, std::string>> argNames;
+    argNames.push_back(std::make_pair("this", className));
+
+    if (ctx->functionDecl()->paramList()) {
+        auto paramCtx = ctx->functionDecl()->paramList();
+        for (int i = 0; i < paramCtx->TYPE().size(); i++) {
+            std::string typeStr = paramCtx->TYPE(i)->getText();
+            std::string argName = paramCtx->ID(i)->getText();
+            argNames.push_back(std::make_pair(argName, typeStr));
+
+            if (typeStr == "int") {
+                argTypes.push_back(Type::getInt32Ty(*theContext));
+            }
+            else if (typeStr == "long") {
+                argTypes.push_back(Type::getInt64Ty(*theContext));
+            }
+            else if (typeStr == "float") {
+                argTypes.push_back(Type::getFloatTy(*theContext));
+            }
+            else if (typeStr == "double") {
+                argTypes.push_back(Type::getDoubleTy(*theContext));
+            }
+            else if (typeStr == "bool") {
+                argTypes.push_back(Type::getInt1Ty(*theContext));
+            }
+        }
+    }
+
+    FunctionType* FT = FunctionType::get(returnedType, argTypes, false);
+    Function* function = Function::Create(FT, Function::ExternalLinkage, functionName, *theModule);
+
+    BasicBlock* BB = BasicBlock::Create(*theContext, "entry", function);
+    builder->SetInsertPoint(BB);
+
+    int idx = 0;
+    for (auto& arg : function->args()) {
+        arg.setName(argNames[idx].first);
+        if (idx == 0) {
+            namedValues.insert_or_assign(argNames[idx].first, std::make_pair(&arg, argNames[idx].second));
+            idx++;
+            continue;
+        }
+        AllocaInst* allocaVar = builder->CreateAlloca(arg.getType(), nullptr, arg.getName());
+        builder->CreateStore(&arg, allocaVar);
+        namedValues.insert_or_assign(argNames[idx].first, std::make_pair(allocaVar, argNames[idx].second));
+        idx++;
+    }
+
+    for (auto statement : ctx->functionDecl()->statement()) {
+        visitStatement(statement);
+    }
+
+
+    if (ctx->functionDecl()->returnStatement()) {
+        if (returnedType == Type::getVoidTy(*theContext)) {
+            return logErrorV("Funkcja typu void nie moze nic zwrocic");
+        }
+        Value* returnValue = std::any_cast<Value*>(visitReturnStatement(ctx->functionDecl()->returnStatement()));
+        builder->CreateRet(returnValue);
+    }
+    if (returnedType == Type::getVoidTy(*theContext)) {
+        builder->CreateRetVoid();
+    }
+    namedValues.clear();
+    
+    return nullptr;
+}
+
+std::any LLVMGenerator::visitVarInit(KiepskiLangParser::VarInitContext* ctx) {
+    std::string type = ctx->TYPE()->getText();
+    Type* resultType = nullptr;
+
+    if (type == "int") {
+        resultType = Type::getInt32Ty(*theContext);
+    }
+    else if (type == "long") {
+        resultType = Type::getInt64Ty(*theContext);
+    }
+    else if (type == "float") {
+        resultType = Type::getFloatTy(*theContext);
+    }
+    else if (type == "double") {
+        resultType = Type::getDoubleTy(*theContext);
+    }
+    else if (type == "bool") {
+        resultType = Type::getInt1Ty(*theContext);
+    }
+    return resultType;
 }
 
 std::any LLVMGenerator::visitStart(KiepskiLangParser::StartContext* ctx) {
@@ -60,6 +359,9 @@ std::any LLVMGenerator::visitStatement(KiepskiLangParser::StatementContext* ctx)
         if (dynamic_cast<KiepskiLangParser::ScalarDeclContext*>(ctx->varDecl())) {
             return visitScalarDecl(dynamic_cast<KiepskiLangParser::ScalarDeclContext*>(ctx->varDecl()));
         }
+        if (dynamic_cast<KiepskiLangParser::ObjectInstanceDeclContext*>(ctx->varDecl())) {
+            return visitObjectInstanceDecl(dynamic_cast<KiepskiLangParser::ObjectInstanceDeclContext*>(ctx->varDecl()));
+        }
         if (dynamic_cast<KiepskiLangParser::ArrayDeclContext*>(ctx->varDecl())) {
             return visitArrayDecl(dynamic_cast<KiepskiLangParser::ArrayDeclContext*>(ctx->varDecl()));
         }
@@ -70,6 +372,9 @@ std::any LLVMGenerator::visitStatement(KiepskiLangParser::StatementContext* ctx)
     if (ctx->varAssign()) {
         if (dynamic_cast<KiepskiLangParser::VariableAssignContext*>(ctx->varAssign())) {
             return visitVariableAssign(dynamic_cast<KiepskiLangParser::VariableAssignContext*>(ctx->varAssign()));
+        }
+        if (dynamic_cast<KiepskiLangParser::FieldAssignContext*>(ctx->varAssign())) {
+            return visitFieldAssign(dynamic_cast<KiepskiLangParser::FieldAssignContext*>(ctx->varAssign()));
         }
         if (dynamic_cast<KiepskiLangParser::ArrayAssignContext*>(ctx->varAssign())) {
             return visitArrayAssign(dynamic_cast<KiepskiLangParser::ArrayAssignContext*>(ctx->varAssign()));
@@ -98,38 +403,47 @@ std::any LLVMGenerator::visitStatement(KiepskiLangParser::StatementContext* ctx)
 
 std::any LLVMGenerator::visitScalarDecl(KiepskiLangParser::ScalarDeclContext* ctx) {
     Value* evaluatedExpr = std::any_cast<Value*>(visitExpr(ctx->expr()));
-
     if (!evaluatedExpr) {
         return logErrorV("Blad przy deklaracji zmiennej " + ctx->ID()->getText());
     }
 
+    if (globalValues[ctx->ID()->getText()].first) {
+        return logErrorV("Nie mozesz ponownie zainicjalizowac zmiennej globalnej");
+    }
+
     AllocaInst* allocatedVar = nullptr;
+    std::string type = "";
     if (ctx->TYPE()->getText() == "int") {
         allocatedVar = builder->CreateAlloca(Type::getInt32Ty(*theContext), nullptr, ctx->ID()->getText());
+        type = "int";
         if (evaluatedExpr->getType()->isFloatTy()) {
             evaluatedExpr = builder->CreateCast(Instruction::FPToSI, evaluatedExpr, Type::getInt32Ty(*theContext));
         }
     }
     if (ctx->TYPE()->getText() == "long") {
         allocatedVar = builder->CreateAlloca(Type::getInt64Ty(*theContext), nullptr, ctx->ID()->getText());
+        type = "long";
         if (evaluatedExpr->getType() == Type::getInt32Ty(*theContext)) {
             evaluatedExpr = builder->CreateSExt(evaluatedExpr, Type::getInt64Ty(*theContext));
         }
     }
     else if (ctx->TYPE()->getText() == "float") {
         allocatedVar = builder->CreateAlloca(Type::getFloatTy(*theContext), nullptr, ctx->ID()->getText());
+        type = "float";
         if (evaluatedExpr->getType()->isIntegerTy()) {
             evaluatedExpr = builder->CreateCast(Instruction::SIToFP, evaluatedExpr, Type::getFloatTy(*theContext));
         }
     }
     else if (ctx->TYPE()->getText() == "double") {
         allocatedVar = builder->CreateAlloca(Type::getDoubleTy(*theContext), nullptr, ctx->ID()->getText());
+        type = "double";
         if (evaluatedExpr->getType() == Type::getFloatTy(*theContext)) {
             evaluatedExpr = builder->CreateFPExt(evaluatedExpr, Type::getDoubleTy(*theContext));
         }
     }
     else if (ctx->TYPE()->getText() == "bool") {
         allocatedVar = builder->CreateAlloca(Type::getInt1Ty(*theContext), nullptr, ctx->ID()->getText());
+        type = "bool";
         if (evaluatedExpr->getType() != Type::getInt1Ty(*theContext)) {
             return logErrorV("Niezgodnosc typow w wyrazeniu bool");
         }
@@ -137,9 +451,70 @@ std::any LLVMGenerator::visitScalarDecl(KiepskiLangParser::ScalarDeclContext* ct
     else if (ctx->TYPE()->getText() == "string") {
         StructType* stringStructTy = StructType::getTypeByName(*theContext, "string");
         allocatedVar = builder->CreateAlloca(stringStructTy, nullptr, ctx->ID()->getText());
+        type = "string";
     }
-    namedValues.insert_or_assign(ctx->ID()->getText(), std::make_pair<Value*, std::string>(allocatedVar, ctx->TYPE()->getText()));
+    else if (ctx->TYPE()->getText() == "var") {
+        Type* evaluatedType = nullptr;
+        StructType* stringStructTy = StructType::getTypeByName(*theContext, "string");
+        if (evaluatedExpr->getType() == Type::getInt32Ty(*theContext)) {
+            evaluatedType = Type::getInt32Ty(*theContext);
+            type = "int";
+        }
+        else if (evaluatedExpr->getType() == Type::getInt64Ty(*theContext)) {
+            evaluatedType = Type::getInt64Ty(*theContext);
+            type = "long";
+        }
+        else if (evaluatedExpr->getType() == Type::getFloatTy(*theContext)) {
+            evaluatedType = Type::getFloatTy(*theContext);
+            type = "float";
+        }
+        else if (evaluatedExpr->getType() == Type::getDoubleTy(*theContext)) {
+            evaluatedType = Type::getDoubleTy(*theContext);
+            type = "double";
+        }
+        else if (evaluatedExpr->getType() == Type::getInt1Ty(*theContext)) {
+            evaluatedType = Type::getInt1Ty(*theContext);
+            type = "bool";
+        }
+        else if (evaluatedExpr->getType() == stringStructTy) {
+            evaluatedType = (Type*)stringStructTy;
+            type = "string";
+        }
+        allocatedVar = builder->CreateAlloca(evaluatedType, nullptr, ctx->ID()->getText());
+    }
+    namedValues.insert_or_assign(ctx->ID()->getText(), std::make_pair(allocatedVar, type));
     return (Value*)builder->CreateStore(evaluatedExpr, allocatedVar);
+}
+
+std::any LLVMGenerator::visitObjectInstanceDecl(KiepskiLangParser::ObjectInstanceDeclContext* ctx) {
+    std::string objectType = ctx->ID(0)->getText();
+    std::string objectName = ctx->ID(1)->getText();
+
+    StructType* structTy = StructType::getTypeByName(*theContext, objectType);
+    if (!structTy) {
+        return logErrorV("Nie rozpoznano typu");
+    }
+
+    AllocaInst* allocatedVar = builder->CreateAlloca(structTy, nullptr, objectName);
+
+    auto argList = ctx->argList();
+    if (argList) {
+        auto exprs = ctx->argList()->expr();
+
+        int idx = 0;
+        for (auto arg : exprs) {
+            Value* argValue = std::any_cast<Value*>(visitExpr(arg));
+            /*if (structTy->getElementType(idx) != argValue->getType()) {
+                return logErrorV("Niezgodne typy w konstruktorze");
+            }*/
+            Value* fieldPtr = builder->CreateStructGEP(structTy, allocatedVar, idx, "fieldptr");
+            builder->CreateStore(argValue, fieldPtr);
+            idx++;
+        }
+    }
+
+    namedValues.insert_or_assign(objectName, std::make_pair(allocatedVar, objectType));
+    return (Value*)allocatedVar;
 }
 
 std::any LLVMGenerator::visitArrayDecl(KiepskiLangParser::ArrayDeclContext* ctx) {
@@ -169,14 +544,39 @@ std::any LLVMGenerator::visitMatrixDecl(KiepskiLangParser::MatrixDeclContext* ct
 std::any LLVMGenerator::visitVariableAssign(KiepskiLangParser::VariableAssignContext* ctx) {
     std::string varName = ctx->ID()->getText();
 
-    Value* allocatedVar = namedValues[varName].first;
-    if (!allocatedVar) {
-        return logErrorV("Unknown variable name: " + varName);
-    }
-
     Value* evaluatedExpr = std::any_cast<Value*>(visitExpr(ctx->expr()));
     if (!evaluatedExpr) {
         return logErrorV("Blad przy przypisaniu zmiennej " + varName);
+    }
+
+    if (globalValues[varName].first) {
+        GlobalVariable* globalVar = theModule->getGlobalVariable(varName);
+        if (!globalVar) {
+            std::string globalTypeStr = globalValues[varName].second;
+            Type* globalType = nullptr;
+            if (globalTypeStr == "int") {
+                globalType = Type::getInt32Ty(*theContext);
+            }
+            else if (globalTypeStr == "long") {
+                globalType = Type::getInt64Ty(*theContext);
+            }
+            else if (globalTypeStr == "float") {
+                globalType = Type::getFloatTy(*theContext);
+            }
+            else if (globalTypeStr == "double") {
+                globalType = Type::getDoubleTy(*theContext);
+            }
+            else if (globalTypeStr == "bool") {
+                globalType = Type::getInt1Ty(*theContext);
+            }
+            globalVar = new GlobalVariable(*theModule, globalType, false, llvm::GlobalValue::PrivateLinkage, (Constant*)globalValues[varName].first, varName);
+        }
+        return (Value*)builder->CreateStore(evaluatedExpr, globalVar);
+    }
+
+    Value* allocatedVar = namedValues[varName].first;
+    if (!allocatedVar) {
+        return logErrorV("Unknown variable name: " + varName);
     }
 
     auto* allocaInst = llvm::dyn_cast<llvm::AllocaInst>(allocatedVar);
@@ -185,6 +585,42 @@ std::any LLVMGenerator::visitVariableAssign(KiepskiLangParser::VariableAssignCon
     }
     
     return (Value*)builder->CreateStore(evaluatedExpr, allocatedVar);
+}
+
+std::any LLVMGenerator::visitFieldAssign(KiepskiLangParser::FieldAssignContext* ctx) {
+    std::string varName = ctx->ID(0)->getText();
+    std::string field = ctx->ID(1)->getText();
+
+    Value* allocatedVar = namedValues[varName].first;
+    if (!allocatedVar) {
+        return logErrorV("Unknown variable name: " + varName);
+    }
+
+    std::string type = namedValues[varName].second;
+    auto fields = structs[type];
+    int fieldIdx = 0;
+    for (auto structField : fields) {
+        if (structField.first == field) break;
+        fieldIdx++;
+    }
+
+    if (currentClass.empty()) {
+        if (fields[fieldIdx].second == "PRIVATE") {
+            return logErrorV("Dostep do zmiennej zostal ograniczony");
+        }
+    }
+    StructType* structTy = StructType::getTypeByName(*theContext, type);
+    if (!structTy) {
+        return logErrorV("Nie rozpoznano typu");
+    }
+
+    Value* evaluatedExpr = std::any_cast<Value*>(visitExpr(ctx->expr()));
+    if (!evaluatedExpr) {
+        return logErrorV("Blad przy przypisaniu do pola");
+    }
+
+    Value* fieldPtr = builder->CreateStructGEP(structTy, allocatedVar, fieldIdx, "fieldptr");
+    return (Value*)builder->CreateStore(evaluatedExpr, fieldPtr);
 }
 
 std::any LLVMGenerator::visitArrayAssign(KiepskiLangParser::ArrayAssignContext* ctx) {
@@ -512,6 +948,9 @@ std::any LLVMGenerator::visitExpr(KiepskiLangParser::ExprContext* ctx) {
     else if (dynamic_cast<KiepskiLangParser::VarReferenceContext*>(ctx)) {
         return visitVarReference(dynamic_cast<KiepskiLangParser::VarReferenceContext*>(ctx));
     }
+    else if (dynamic_cast<KiepskiLangParser::FunctionCallExprContext*>(ctx)) {
+        return visitFunctionCallExpr(dynamic_cast<KiepskiLangParser::FunctionCallExprContext*>(ctx));
+    }
     else if (dynamic_cast<KiepskiLangParser::BracesContext*>(ctx)) {
         return visitBraces(dynamic_cast<KiepskiLangParser::BracesContext*>(ctx));
     }
@@ -521,7 +960,45 @@ std::any LLVMGenerator::visitExpr(KiepskiLangParser::ExprContext* ctx) {
     else if (dynamic_cast<KiepskiLangParser::MatrixAccessExprContext*>(ctx)) {
         return visitMatrixAccessExpr(dynamic_cast<KiepskiLangParser::MatrixAccessExprContext*>(ctx));
     }
+    else if (dynamic_cast<KiepskiLangParser::FieldAccessExprContext*>(ctx)) {
+        return visitFieldAccessExpr(dynamic_cast<KiepskiLangParser::FieldAccessExprContext*>(ctx));
+    }
+    else if (dynamic_cast<KiepskiLangParser::MethodCallExprContext*>(ctx)) {
+        return visitMethodCallExpr(dynamic_cast<KiepskiLangParser::MethodCallExprContext*>(ctx));
+    }
     return nullptr;
+}
+
+std::any LLVMGenerator::visitFieldAccessExpr(KiepskiLangParser::FieldAccessExprContext* ctx) {
+    std::string varName = ctx->ID(0)->getText();
+    std::string field = ctx->ID(1)->getText();
+
+    Value* allocatedVar = namedValues[varName].first;
+    if (!allocatedVar) {
+        return logErrorV("Unknown variable name: " + varName);
+    }
+
+    std::string type = namedValues[varName].second;
+    auto fields = structs[type];
+    int fieldIdx = 0;
+    for (auto structField : fields) {
+        if (structField.first == field) break;
+        fieldIdx++;
+    }
+
+    if (currentClass.empty()) {
+        if (fields[fieldIdx].second == "PRIVATE") {
+            return logErrorV("Dostep do zmiennej zostal ograniczony");
+        }
+    }
+
+    StructType* structTy = StructType::getTypeByName(*theContext, type);
+    if (!structTy) {
+        return logErrorV("Nie rozpoznano typu");
+    }
+
+    Value* fieldPtr = builder->CreateStructGEP(structTy, allocatedVar, fieldIdx, "fieldptr");
+    return (Value*)builder->CreateLoad(structTy->getElementType(fieldIdx), fieldPtr, "fieldval");
 }
 
 std::any LLVMGenerator::visitLogicBinaryExpr(KiepskiLangParser::LogicBinaryExprContext* ctx) {
@@ -744,6 +1221,10 @@ std::any LLVMGenerator::visitAddExpr(KiepskiLangParser::AddExprContext* ctx) {
         }
     }
     return nullptr;
+}
+
+std::any LLVMGenerator::visitFunctionCallExpr(KiepskiLangParser::FunctionCallExprContext* ctx) {
+    return visitFunctionCall(ctx->functionCall());
 }
 
 std::any LLVMGenerator::visitIntLiteral(KiepskiLangParser::IntLiteralContext* ctx) {
@@ -1173,6 +1654,33 @@ std::any LLVMGenerator::visitBraces(KiepskiLangParser::BracesContext* ctx) {
 std::any LLVMGenerator::visitVarReference(KiepskiLangParser::VarReferenceContext* ctx) {
     std::string varName = ctx->ID()->getText();
     
+    if (globalValues[varName].first) {
+        GlobalVariable* globalVar = theModule->getGlobalVariable(varName);
+        std::string globalTypeStr = globalValues[varName].second;
+        Type* globalType = nullptr;
+        if (globalTypeStr == "int") {
+            globalType = Type::getInt32Ty(*theContext);
+        }
+        else if (globalTypeStr == "long") {
+            globalType = Type::getInt64Ty(*theContext);
+        }
+        else if (globalTypeStr == "float") {
+            globalType = Type::getFloatTy(*theContext);
+        }
+        else if (globalTypeStr == "double") {
+            globalType = Type::getDoubleTy(*theContext);
+        }
+        else if (globalTypeStr == "bool") {
+            globalType = Type::getInt1Ty(*theContext);
+        }
+
+        if (!globalVar) {
+            globalVar = new GlobalVariable(*theModule, globalType, false, llvm::GlobalValue::ExternalLinkage, (Constant*)globalValues[varName].first, varName);
+        }
+
+        return (Value*)builder->CreateLoad(globalType, globalVar, varName + "_val");
+    }
+
     Value* v = namedValues[varName].first;
     if (!v) {
         return logErrorV("Unknown variable name: " + varName);
@@ -1202,6 +1710,50 @@ std::any LLVMGenerator::visitVarReference(KiepskiLangParser::VarReferenceContext
         return (Value*)builder->CreateLoad(allocaInst->getAllocatedType(), v,  varName + "_ptr");
     }
     return nullptr;
+}
+
+std::any LLVMGenerator::visitMethodCallExpr(KiepskiLangParser::MethodCallExprContext* ctx) {
+    std::string varName = ctx->ID()->getText();
+
+    Value* allocatedVar = namedValues[varName].first;
+    if (!allocatedVar) {
+        return logErrorV("Unknown variable name: " + varName);
+    }
+
+    std::string type = namedValues[varName].second;
+    StructType* structTy = StructType::getTypeByName(*theContext, type);
+    if (!structTy) {
+        return logErrorV("Nie rozpoznano typu");
+    }
+
+    std::string methodName = ctx->functionCall()->ID()->getText();
+    
+    auto classMethods = declaredMethods[type];
+    int fieldIdx = 0;
+    for (auto method : classMethods) {
+        if (method.first == methodName) {
+            if (currentClass.empty() && method.second == "PRIVATE") {
+                return logErrorV("Dostep do metody zostal ograniczony");
+            }
+            break;
+        }
+        fieldIdx++;
+    }
+
+    Function* calledMethod = theModule->getFunction(methodName);
+    if (!calledMethod) {
+        return logErrorV("Metodaunkcja " + methodName + " nie została zadeklarowana");
+    }
+    std::vector<Value*> args;
+    args.push_back(allocatedVar);
+    if (ctx->functionCall()->argList()) {
+        auto exprs = ctx->functionCall()->argList()->expr();
+        for (auto arg : exprs) {
+            args.push_back(std::any_cast<Value*>(visitExpr(arg)));
+        }
+    }
+
+    return (Value*)builder->CreateCall(calledMethod, args);
 }
 
 std::any LLVMGenerator::visitLogicNegExpr(KiepskiLangParser::LogicNegExprContext* ctx) {
@@ -1326,4 +1878,30 @@ std::any LLVMGenerator::visitMatrixInit(KiepskiLangParser::MatrixInitContext* ct
         return matrixMem;
     }
     return nullptr;
+}
+
+std::any LLVMGenerator::visitFunctionCall(KiepskiLangParser::FunctionCallContext* ctx) {
+    std::string functionName = ctx->ID()->getText();
+
+    Function* calledFunction = theModule->getFunction(functionName);
+    if (!calledFunction) {
+        return logErrorV("Funkcja " + functionName + " nie została zadeklarowana");
+    }
+
+    if (ctx->argList()) {
+        auto args = std::any_cast<std::vector<Value*>>(visitArgList(ctx->argList()));
+        return (Value*)builder->CreateCall(calledFunction, args);
+    }
+
+    return (Value*)builder->CreateCall(calledFunction);
+}
+
+std::any LLVMGenerator::visitArgList(KiepskiLangParser::ArgListContext* ctx) {
+    auto exprs = ctx->expr();
+    std::vector<Value*> args;
+
+    for (auto arg : exprs) {
+        args.push_back(std::any_cast<Value*>(visitExpr(arg)));
+    }
+    return args;
 }

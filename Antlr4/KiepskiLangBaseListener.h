@@ -19,6 +19,33 @@ public:
   virtual void enterProgram(KiepskiLangParser::ProgramContext * /*ctx*/) override { }
   virtual void exitProgram(KiepskiLangParser::ProgramContext * /*ctx*/) override { }
 
+  virtual void enterFunctionDecl(KiepskiLangParser::FunctionDeclContext * /*ctx*/) override { }
+  virtual void exitFunctionDecl(KiepskiLangParser::FunctionDeclContext * /*ctx*/) override { }
+
+  virtual void enterGlobalVarDecl(KiepskiLangParser::GlobalVarDeclContext * /*ctx*/) override { }
+  virtual void exitGlobalVarDecl(KiepskiLangParser::GlobalVarDeclContext * /*ctx*/) override { }
+
+  virtual void enterStructDecl(KiepskiLangParser::StructDeclContext * /*ctx*/) override { }
+  virtual void exitStructDecl(KiepskiLangParser::StructDeclContext * /*ctx*/) override { }
+
+  virtual void enterClassDecl(KiepskiLangParser::ClassDeclContext * /*ctx*/) override { }
+  virtual void exitClassDecl(KiepskiLangParser::ClassDeclContext * /*ctx*/) override { }
+
+  virtual void enterClassField(KiepskiLangParser::ClassFieldContext * /*ctx*/) override { }
+  virtual void exitClassField(KiepskiLangParser::ClassFieldContext * /*ctx*/) override { }
+
+  virtual void enterClassMethod(KiepskiLangParser::ClassMethodContext * /*ctx*/) override { }
+  virtual void exitClassMethod(KiepskiLangParser::ClassMethodContext * /*ctx*/) override { }
+
+  virtual void enterVarInit(KiepskiLangParser::VarInitContext * /*ctx*/) override { }
+  virtual void exitVarInit(KiepskiLangParser::VarInitContext * /*ctx*/) override { }
+
+  virtual void enterParamList(KiepskiLangParser::ParamListContext * /*ctx*/) override { }
+  virtual void exitParamList(KiepskiLangParser::ParamListContext * /*ctx*/) override { }
+
+  virtual void enterReturnStatement(KiepskiLangParser::ReturnStatementContext * /*ctx*/) override { }
+  virtual void exitReturnStatement(KiepskiLangParser::ReturnStatementContext * /*ctx*/) override { }
+
   virtual void enterStart(KiepskiLangParser::StartContext * /*ctx*/) override { }
   virtual void exitStart(KiepskiLangParser::StartContext * /*ctx*/) override { }
 
@@ -28,6 +55,9 @@ public:
   virtual void enterScalarDecl(KiepskiLangParser::ScalarDeclContext * /*ctx*/) override { }
   virtual void exitScalarDecl(KiepskiLangParser::ScalarDeclContext * /*ctx*/) override { }
 
+  virtual void enterObjectInstanceDecl(KiepskiLangParser::ObjectInstanceDeclContext * /*ctx*/) override { }
+  virtual void exitObjectInstanceDecl(KiepskiLangParser::ObjectInstanceDeclContext * /*ctx*/) override { }
+
   virtual void enterArrayDecl(KiepskiLangParser::ArrayDeclContext * /*ctx*/) override { }
   virtual void exitArrayDecl(KiepskiLangParser::ArrayDeclContext * /*ctx*/) override { }
 
@@ -36,6 +66,9 @@ public:
 
   virtual void enterVariableAssign(KiepskiLangParser::VariableAssignContext * /*ctx*/) override { }
   virtual void exitVariableAssign(KiepskiLangParser::VariableAssignContext * /*ctx*/) override { }
+
+  virtual void enterFieldAssign(KiepskiLangParser::FieldAssignContext * /*ctx*/) override { }
+  virtual void exitFieldAssign(KiepskiLangParser::FieldAssignContext * /*ctx*/) override { }
 
   virtual void enterArrayAssign(KiepskiLangParser::ArrayAssignContext * /*ctx*/) override { }
   virtual void exitArrayAssign(KiepskiLangParser::ArrayAssignContext * /*ctx*/) override { }
@@ -58,6 +91,9 @@ public:
   virtual void enterWhileStatement(KiepskiLangParser::WhileStatementContext * /*ctx*/) override { }
   virtual void exitWhileStatement(KiepskiLangParser::WhileStatementContext * /*ctx*/) override { }
 
+  virtual void enterFieldAccessExpr(KiepskiLangParser::FieldAccessExprContext * /*ctx*/) override { }
+  virtual void exitFieldAccessExpr(KiepskiLangParser::FieldAccessExprContext * /*ctx*/) override { }
+
   virtual void enterLogicBinaryExpr(KiepskiLangParser::LogicBinaryExprContext * /*ctx*/) override { }
   virtual void exitLogicBinaryExpr(KiepskiLangParser::LogicBinaryExprContext * /*ctx*/) override { }
 
@@ -76,6 +112,9 @@ public:
   virtual void enterVarReference(KiepskiLangParser::VarReferenceContext * /*ctx*/) override { }
   virtual void exitVarReference(KiepskiLangParser::VarReferenceContext * /*ctx*/) override { }
 
+  virtual void enterMethodCallExpr(KiepskiLangParser::MethodCallExprContext * /*ctx*/) override { }
+  virtual void exitMethodCallExpr(KiepskiLangParser::MethodCallExprContext * /*ctx*/) override { }
+
   virtual void enterArrayAccessExpr(KiepskiLangParser::ArrayAccessExprContext * /*ctx*/) override { }
   virtual void exitArrayAccessExpr(KiepskiLangParser::ArrayAccessExprContext * /*ctx*/) override { }
 
@@ -84,6 +123,9 @@ public:
 
   virtual void enterAddExpr(KiepskiLangParser::AddExprContext * /*ctx*/) override { }
   virtual void exitAddExpr(KiepskiLangParser::AddExprContext * /*ctx*/) override { }
+
+  virtual void enterFunctionCallExpr(KiepskiLangParser::FunctionCallExprContext * /*ctx*/) override { }
+  virtual void exitFunctionCallExpr(KiepskiLangParser::FunctionCallExprContext * /*ctx*/) override { }
 
   virtual void enterMulExpr(KiepskiLangParser::MulExprContext * /*ctx*/) override { }
   virtual void exitMulExpr(KiepskiLangParser::MulExprContext * /*ctx*/) override { }
@@ -102,6 +144,12 @@ public:
 
   virtual void enterMatrixInit(KiepskiLangParser::MatrixInitContext * /*ctx*/) override { }
   virtual void exitMatrixInit(KiepskiLangParser::MatrixInitContext * /*ctx*/) override { }
+
+  virtual void enterFunctionCall(KiepskiLangParser::FunctionCallContext * /*ctx*/) override { }
+  virtual void exitFunctionCall(KiepskiLangParser::FunctionCallContext * /*ctx*/) override { }
+
+  virtual void enterArgList(KiepskiLangParser::ArgListContext * /*ctx*/) override { }
+  virtual void exitArgList(KiepskiLangParser::ArgListContext * /*ctx*/) override { }
 
 
   virtual void enterEveryRule(antlr4::ParserRuleContext * /*ctx*/) override { }

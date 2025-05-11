@@ -21,17 +21,39 @@ public:
    */
     virtual std::any visitProgram(KiepskiLangParser::ProgramContext *context) = 0;
 
+    virtual std::any visitFunctionDecl(KiepskiLangParser::FunctionDeclContext *context) = 0;
+
+    virtual std::any visitGlobalVarDecl(KiepskiLangParser::GlobalVarDeclContext *context) = 0;
+
+    virtual std::any visitStructDecl(KiepskiLangParser::StructDeclContext *context) = 0;
+
+    virtual std::any visitClassDecl(KiepskiLangParser::ClassDeclContext *context) = 0;
+
+    virtual std::any visitClassField(KiepskiLangParser::ClassFieldContext *context) = 0;
+
+    virtual std::any visitClassMethod(KiepskiLangParser::ClassMethodContext *context) = 0;
+
+    virtual std::any visitVarInit(KiepskiLangParser::VarInitContext *context) = 0;
+
+    virtual std::any visitParamList(KiepskiLangParser::ParamListContext *context) = 0;
+
+    virtual std::any visitReturnStatement(KiepskiLangParser::ReturnStatementContext *context) = 0;
+
     virtual std::any visitStart(KiepskiLangParser::StartContext *context) = 0;
 
     virtual std::any visitStatement(KiepskiLangParser::StatementContext *context) = 0;
 
     virtual std::any visitScalarDecl(KiepskiLangParser::ScalarDeclContext *context) = 0;
 
+    virtual std::any visitObjectInstanceDecl(KiepskiLangParser::ObjectInstanceDeclContext *context) = 0;
+
     virtual std::any visitArrayDecl(KiepskiLangParser::ArrayDeclContext *context) = 0;
 
     virtual std::any visitMatrixDecl(KiepskiLangParser::MatrixDeclContext *context) = 0;
 
     virtual std::any visitVariableAssign(KiepskiLangParser::VariableAssignContext *context) = 0;
+
+    virtual std::any visitFieldAssign(KiepskiLangParser::FieldAssignContext *context) = 0;
 
     virtual std::any visitArrayAssign(KiepskiLangParser::ArrayAssignContext *context) = 0;
 
@@ -47,6 +69,8 @@ public:
 
     virtual std::any visitWhileStatement(KiepskiLangParser::WhileStatementContext *context) = 0;
 
+    virtual std::any visitFieldAccessExpr(KiepskiLangParser::FieldAccessExprContext *context) = 0;
+
     virtual std::any visitLogicBinaryExpr(KiepskiLangParser::LogicBinaryExprContext *context) = 0;
 
     virtual std::any visitIntLiteral(KiepskiLangParser::IntLiteralContext *context) = 0;
@@ -59,11 +83,15 @@ public:
 
     virtual std::any visitVarReference(KiepskiLangParser::VarReferenceContext *context) = 0;
 
+    virtual std::any visitMethodCallExpr(KiepskiLangParser::MethodCallExprContext *context) = 0;
+
     virtual std::any visitArrayAccessExpr(KiepskiLangParser::ArrayAccessExprContext *context) = 0;
 
     virtual std::any visitStringLiteral(KiepskiLangParser::StringLiteralContext *context) = 0;
 
     virtual std::any visitAddExpr(KiepskiLangParser::AddExprContext *context) = 0;
+
+    virtual std::any visitFunctionCallExpr(KiepskiLangParser::FunctionCallExprContext *context) = 0;
 
     virtual std::any visitMulExpr(KiepskiLangParser::MulExprContext *context) = 0;
 
@@ -76,6 +104,10 @@ public:
     virtual std::any visitArrayInit(KiepskiLangParser::ArrayInitContext *context) = 0;
 
     virtual std::any visitMatrixInit(KiepskiLangParser::MatrixInitContext *context) = 0;
+
+    virtual std::any visitFunctionCall(KiepskiLangParser::FunctionCallContext *context) = 0;
+
+    virtual std::any visitArgList(KiepskiLangParser::ArgListContext *context) = 0;
 
 
 };

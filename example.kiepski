@@ -1,8 +1,15 @@
-START PROGRAM:
-int i = 0
-WHILE i < 5
-PRINT "dupa"
-i = i + 1
+CLASS myClass
+    PUBLIC int a
+    PRIVATE float b
+
+    PUBLIC FUNCTION pokaz() => void
+        PRINT this->a
+        PRINT this->b
+    END 
+
 END
 
+START PROGRAM:
+myClass x = NEW myClass(10, 5.5)
+PRINT x->a
 END PROGRAM
